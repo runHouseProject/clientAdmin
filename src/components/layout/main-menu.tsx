@@ -13,15 +13,36 @@ const mainMenuData: IMenu[] = [
     },
   },
   {
-    id: "product",
-    name: "상품 관리",
+    id: "meeting",
+    name: "모임",
     icon: <Package2 className="w-5 h-5" />,
     submenu: [
       {
         id: "productList",
-        name: "상품 목록",
+        name: "모임",
         link: {
-          path: "/sample/product/list",
+          path: "/meeting/list",
+        },
+      },
+      {
+        id: "productStatic",
+        name: "달력",
+        link: {
+          path: "/meeting/list/static",
+        },
+      },
+    ],
+  },
+  {
+    id: "user",
+    name: "크루원",
+    icon: <Package2 className="w-5 h-5" />,
+    submenu: [
+      {
+        id: "userList",
+        name: "크루원",
+        link: {
+          path: "/user/list",
         },
       },
     ],
@@ -31,13 +52,19 @@ const mainMenuData: IMenu[] = [
 const devMenuData: IMenu[] = [
   {
     id: "dev",
-    name: "사용 가이드",
+    name: "데이터 통계",
     icon: <Monitor className="w-5 h-5" />,
     submenu: [
       {
-        name: "폼",
+        name: "유저",
         link: {
-          path: "/sample/form",
+          path: "/static/user",
+        },
+      },
+      {
+        name: "모임",
+        link: {
+          path: "/static/meeting",
         },
       },
     ],
@@ -49,14 +76,14 @@ const MainMenu = () => {
     <>
       <>
         <Divider orientation="left" plain>
-          메인
+          관리
         </Divider>
 
         <Menu data={mainMenuData} />
       </>
       <>
         <Divider orientation="left" plain>
-          개발
+          분석
         </Divider>
 
         <Menu data={devMenuData} />
