@@ -9,6 +9,8 @@ const pageHeader: IPageHeader = {
   title: "Welcome",
 };
 
+// 메인 페이지
+
 const IndexPage: IDefaultLayoutPage = () => {
   const { session } = useAuth();
   const { data, error } = useDashboard();
@@ -17,7 +19,7 @@ const IndexPage: IDefaultLayoutPage = () => {
     <>
       <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2>
 
-      <div className="my-5">
+      <div>
         {data ? (
           <StatisticSample data={data} />
         ) : error ? (
@@ -27,16 +29,16 @@ const IndexPage: IDefaultLayoutPage = () => {
         )}
       </div>
 
-      <Divider />
+      {/* <Divider /> */}
 
-      <h3 className="title">달력</h3>
+      {/* <h3 className="title">달력</h3> */}
 
-      <CalendarSample />
+      {/* <CalendarSample /> */}
     </>
   );
 };
 
 IndexPage.getLayout = getDefaultLayout;
-IndexPage.pageHeader = pageHeader;
+// IndexPage.pageHeader = pageHeader;
 
 export default IndexPage;
