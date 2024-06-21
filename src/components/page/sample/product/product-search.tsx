@@ -35,7 +35,7 @@ const ProductSearch = () => {
       <FormSearch>
         <FieldInline>
           <Form.Item label="기간" name="searchDateType" initialValue="created">
-            <Select dropdownMatchSelectWidth={false}>
+            <Select>
               <Select.Option value="created">등록일자</Select.Option>
               <Select.Option value="updated">수정일자</Select.Option>
             </Select>

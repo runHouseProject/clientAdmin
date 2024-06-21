@@ -28,7 +28,7 @@ const mainMenuData: IMenu[] = [
         id: "productStatic",
         name: "달력",
         link: {
-          path: "/meeting/list/static",
+          path: "/meeting/calendar",
         },
       },
     ],
