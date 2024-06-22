@@ -1,9 +1,9 @@
 import { useDashboard } from "@/client/sample/dashboard";
 import { getDefaultLayout, IDefaultLayoutPage, IPageHeader } from "@/components/layout/default-layout";
-import StatisticSample from "@/components/page/index/statistic-sample";
+
 import { useAuth } from "@/lib/auth/auth-provider";
 import ProductListPage from "@/pages/sample/product/list";
-import { Alert, Divider, Skeleton } from "antd";
+import SortTable from "@/components/shared/table";
 
 const pageHeader: IPageHeader = {
   title: "Welcome",
@@ -28,7 +28,8 @@ const IndexPage: IDefaultLayoutPage = () => {
         )}
       </div> */}
       {/* ProductListPage */}
-      <ProductListPage />
+      <SortTable />
+      {/* <ProductListPage />  */}
       {/* <Divider /> */}
       {/* <h3 className="title">달력</h3> */}
       {/* <CalendarSample /> */}
