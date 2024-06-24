@@ -33,7 +33,7 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
     <>
       <div className="p-1">
         <div className="flex space-x-4">
-          <div className="flex flex-col space-y-4 flex-1">
+          <div className="flex flex-col flex-1 space-y-4">
             <div className="p-5 border rounded-lg ">
               <div>1</div>
               <div className="mt-3">
@@ -101,9 +101,9 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col space-y-4 flex-1">
-            <div className="flex-2 space-x-4 h-full">
-              <div className="p-5 border rounded-lg h-full">
+          <div className="flex flex-col flex-1 space-y-4">
+            <div className="h-full space-x-4 flex-2">
+              <div className="h-full p-5 border rounded-lg">
                 <div>6</div>
                 <div className="mt-3">
                   <div className="flex items-center mt-3">
@@ -115,8 +115,8 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
                 </div>
               </div>
             </div>
-            <div className="flex-2 space-x-4 h-full">
-              <div className="p-5 border rounded-lg h-full ">
+            <div className="h-full space-x-4 flex-2">
+              <div className="h-full p-5 border rounded-lg ">
                 <div>7</div>
                 {/* <div className="mt-3">
                   <div className="text-2xl font-semibold grow">
@@ -129,8 +129,8 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
                 <CustomLabelPieChart />
               </div>
             </div>
-            <div className="flex-2 space-x-4 h-full">
-              <div className="p-5 border rounded-lg h-full ">
+            <div className="h-full space-x-4 flex-2">
+              <div className="h-full p-5 border rounded-lg ">
                 <div>7</div>
                 {/* <div className="mt-3">
                   <div className="text-2xl font-semibold grow">
@@ -145,9 +145,9 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col space-y-4 flex-1">
-            <div className="flex-1 space-x-4 h-full">
-              <div className="p-5 border rounded-lg h-full">
+          <div className="flex flex-col flex-1 space-y-4">
+            <div className="flex-1 h-full space-x-4">
+              <div className="h-full p-5 border rounded-lg">
                 <div>10</div>
                 <div className="mt-3">
                   <div className="flex items-center mt-3">
@@ -159,8 +159,8 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
                 </div>
               </div>
             </div>
-            <div className="flex-1 space-x-4 h-full">
-              <div className="p-5 border rounded-lg h-full ">
+            <div className="flex-1 h-full space-x-4">
+              <div className="h-full p-5 border rounded-lg ">
                 <div>11</div>
                 <div className="mt-3">
                   <div className="text-2xl font-semibold grow">

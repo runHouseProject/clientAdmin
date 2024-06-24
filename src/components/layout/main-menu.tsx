@@ -56,9 +56,9 @@ const devMenuData: IMenu[] = [
     icon: <Monitor className="w-5 h-5" />,
     submenu: [
       {
-        name: "유저",
+        name: "월간",
         link: {
-          path: "/static/user",
+          path: "/static/month",
         },
       },
       {
