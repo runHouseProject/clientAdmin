@@ -2,6 +2,7 @@ import { useDashboard } from "@/client/sample/dashboard";
 import { getDefaultLayout, IDefaultLayoutPage, IPageHeader } from "@/components/layout/default-layout";
 import CalendarSample from "@/components/page/index/calendar-sample";
 import StatisticMonth from "@/components/page/static/month";
+
 import { useAuth } from "@/lib/auth/auth-provider";
 import { Alert, Divider, Skeleton } from "antd";
 
