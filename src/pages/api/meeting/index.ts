@@ -186,7 +186,6 @@ export async function getMeetingDateByid(id: string): Promise<MeetingData> {
   }
 
   // data;
-  console.log("data3333: ", data);
 
   if (!data) {
     throw new Error("Meeting data not found");
@@ -212,19 +211,19 @@ interface UpdateMeetingParams {
   meeting_date?: string;
   birthYear?: number;
   founder?: boolean;
-  activation_name?: string;
-  location_name?: string;
+  activation?: string;
+  location?: string;
 }
 
-export const updateMeeting = async ({
+export async function updateMeeting({
   id,
   name,
   meeting_date,
   birthYear,
   founder,
-  activation_name,
-  location_name,
-}: UpdateMeetingParams): Promise<{ data: any; error: any }> => {
+  activation,
+  location,
+}: UpdateMeetingParams): Promise<{ data: any; error: any }> {
   let updates: any = { updated_at: new Date().toISOString() };
 
   if (name) updates.name = name;
@@ -232,65 +231,45 @@ export const updateMeeting = async ({
   if (birthYear) updates.birthYear = birthYear;
   if (founder !== undefined) updates.founder = founder;
 
-  if (activation_name) {
+  if (activation) {
     const { data: activationData, error: activationError } = await supabase
       .from("activation")
       .select("code")
-      .eq("name", activation_name)
+      .eq("name", activation)
       .single();
 
     if (activationError) {
-      return { data: null, error: activationError };
+      // return { data: null, error: activationError };
+      throw new Error("activationError");
     }
 
     updates.activation = activationData.code;
   }
 
-  if (location_name) {
+  if (location) {
     const { data: locationData, error: locationError } = await supabase
       .from("location")
       .select("code")
-      .eq("name", location_name)
+      .eq("name", location)
       .single();
 
     if (locationError) {
-      return { data: null, error: locationError };
+      throw new Error("locationError");
     }
 
     updates.location = locationData.code;
   }
 
-  const { data, error } = await supabase.from("meeting").update(updates).eq("_id", id);
-
-  return { data, error };
-};
-
-import type { NextApiRequest, NextApiResponse } from "next";
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
-  }
-
-  const { id, name, meeting_date, birthYear, founder, activation_name, location_name } = req.body;
-
-  if (!id) {
-    return res.status(400).json({ message: "ID 값이 비어져있습니다" });
-  }
-
-  const { data, error } = await updateMeeting({
-    id,
-    name,
-    meeting_date,
-    birthYear,
-    founder,
-    activation_name,
-    location_name,
-  });
+  const { data, error } = await supabase.from("meeting").update(updates).eq("_id", id).select();
 
   if (error) {
-    return res.status(500).json({ message: error.message });
+    console.error(error);
+    throw new Error("Failed to fetch meeting data");
   }
 
-  return res.status(200).json({ data });
+  if (!data) {
+    throw new Error("Meeting data not found");
+  }
+
+  return { data, error };
 }

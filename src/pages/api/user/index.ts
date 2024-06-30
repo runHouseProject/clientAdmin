@@ -17,7 +17,7 @@ export async function getUserAttendance(): Promise<getUserAttendanceList[]> {
   };
 
   // data;
-  console.log("data: ", data);
+  // console.log("data: ", data);
 
   if (error) {
     console.error("Error fetching data:", error);

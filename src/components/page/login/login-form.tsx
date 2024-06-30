@@ -20,7 +20,7 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      console.log(value);
+      // console.log(value);
       await signIn("login-credentials", { username: value.username, password: value.password });
     } catch (error) {
       setIsLoading(false);
@@ -65,7 +65,7 @@ const LoginForm = () => {
             />
           </svg>
         </a> */}
-        <a className="flex items-center justify-center h-20 grow btn bg-yellow-300" onClick={() => signIn("kakao")}>
+        <a className="flex items-center justify-center h-20 bg-yellow-300 grow btn" onClick={() => signIn("kakao")}>
           {/* <svg width="28" height="28" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M24 1C10.748 1 0 10.044 0 21.333c0 6.243 3.5 11.79 8.97 15.337-.387 1.46-1.006 3.786-1.442 5.305-.23.804-.623 2.166.178 2.983.807.82 2.245.244 2.947-.165 1.682-.996 3.518-2.073 5.024-3.003 2.505.685 5.184 1.04 8.021 1.04 13.252 0 24-9.044 24-20.333S37.252 1 24 1zm-7.748 27.217c-1.52 0-2.748-1.273-2.748-2.846 0-1.574 1.228-2.846 2.748-2.846 1.517 0 2.747 1.272 2.747 2.846 0 1.573-1.23 2.846-2.747 2.846zm7.296 0c-1.521 0-2.748-1.273-2.748-2.846 0-1.574 1.227-2.846 2.748-2.846s2.747 1.272 2.747 2.846c0 1.573-1.226 2.846-2.747 2.846zm7.297 0c-1.52 0-2.747-1.273-2.747-2.846 0-1.574 1.227-2.846 2.747-2.846 1.518 0 2.748 1.272 2.748 2.846 0 1.573-1.23 2.846-2.748 2.846zm7.29 0c-1.517 0-2.746-1.273-2.746-2.846 0-1.574 1.229-2.846 2.746-2.846 1.52 0 2.749 1.272 2.749 2.846 0 1.573-1.23 2.846-2.75 2.846z"

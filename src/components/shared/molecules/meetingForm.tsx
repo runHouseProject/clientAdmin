@@ -1,88 +1,118 @@
+// components/shared/molecules/MeetingForm.tsx
 import React, { useEffect } from "react";
-import { Button, Form, Input, InputNumber, Select, DatePicker } from "antd";
+import { Switch, Button, Form, Input, InputNumber, Select, DatePicker } from "antd";
 import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 
-const layout = {
-  labelCol: { span: 8 },
-  wrapperCol: { span: 16 },
-};
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
-/* eslint-disable no-template-curly-in-string */
-const validateMessages = {
-  required: "${label} is required!",
-  types: {
-    email: "${label} is not a valid email!",
-    number: "${label} is not a valid number!",
-  },
-  number: {
-    range: "${label} must be between ${min} and ${max}",
-  },
-};
-/* eslint-enable no-template-curly-in-string */
+interface Option {
+  value: string;
+  label: string;
+}
 
-const onFinish = (values: any) => {
-  console.log(values);
-};
+interface FormField {
+  name: string;
+  label: string;
+  type: "input" | "inputNumber" | "select" | "datePicker" | "checkbox" | "switch";
+  options?: Option[];
+  disabled?: boolean;
+}
 
-const MeetingForm: React.FC<{ meeting: any }> = ({ meeting }) => {
+interface MeetingFormProps {
+  meeting: any;
+  fields: FormField[];
+  onFormFinish: (values: any) => void;
+  onDelete: (id: string) => void;
+  onClose: () => void;
+  layout?: {
+    labelCol?: { span: number };
+    wrapperCol?: { span: number };
+  };
+}
+
+const MeetingForm: React.FC<MeetingFormProps> = ({ meeting, fields, onFormFinish, onDelete, onClose, layout }) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    form.setFieldsValue({
-      participantName: meeting.participantName,
-      birthYear: meeting.birthYear,
-      meeting_date: dayjs(meeting.meeting_date),
-      founder: meeting.founder,
-      activation: meeting.activation,
-      location: meeting.location,
+    const initialValues: any = {};
+    fields.forEach((field) => {
+      initialValues[field.name] =
+        field.type === "datePicker" ? dayjs(meeting[field.name]).tz("Asia/Seoul") : meeting[field.name];
     });
-  }, [meeting, form]);
+    form.setFieldsValue(initialValues);
+  }, [meeting, fields, form]);
+
+  const defaultLayout = {
+    labelCol: { span: 8 },
+    wrapperCol: { span: 16 },
+  };
+
+  const handleFinish = (values: any) => {
+    const adjustedValues = { ...values, id: meeting.key };
+    adjustedValues.meeting_date = adjustedValues.meeting_date.tz("Asia/Seoul").format("YYYY-MM-DD");
+    onFormFinish(adjustedValues);
+  };
+
+  const handleDelete = () => {
+    onDelete(meeting.key);
+  };
 
   return (
     <Form
-      {...layout}
+      {...(layout || defaultLayout)}
       form={form}
       name="meetingForm"
-      onFinish={onFinish}
-      style={{ maxWidth: 380 }}
-      validateMessages={validateMessages}
-      layout="vertical"
+      onFinish={handleFinish}
+      style={{ maxWidth: 300 }}
+      validateMessages={{
+        required: "${label} is required!",
+        types: {
+          email: "${label} is not a valid email!",
+          number: "${label} is not a valid number!",
+        },
+        number: {
+          range: "${label} must be between ${min} and ${max}",
+        },
+      }}
+      // layout="vertical"
     >
-      {/* <Form form={form} name="validateOnly" layout="vertical" autoComplete="off"></Form> */}
-      <Form.Item name="participantName" label="이름">
-        <Input disabled />
-      </Form.Item>
-      <Form.Item name="birthYear" label="년생">
-        <InputNumber disabled />
-      </Form.Item>
-      <Form.Item name="meeting_date" label="참여일">
-        <DatePicker format="YYYY-MM-DD" />
-      </Form.Item>
-      <Form.Item name="founder" label="개설자 여부" valuePropName="checked">
-        <Input type="checkbox" />
-      </Form.Item>
-      <Form.Item name="activation" label="활동">
-        <Select>
-          <Select.Option value="러닝">러닝</Select.Option>
-          <Select.Option value="회의">회의</Select.Option>
-          <Select.Option value="토론">토론</Select.Option>
-        </Select>
-      </Form.Item>
-      <Form.Item name="location" label="장소">
-        <Select>
-          <Select.Option value="태평">태평</Select.Option>
-          <Select.Option value="강남">강남</Select.Option>
-          <Select.Option value="홍대">홍대</Select.Option>
-        </Select>
-      </Form.Item>
-      <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
-        <Button type="default" htmlType="submit">
+      {fields.map((field) => (
+        <Form.Item
+          key={field.name}
+          name={field.name}
+          label={<div className="text-2xl font-semibold grow">{field.label}</div>} // Tailwind CSS 적용
+        >
+          {field.type === "input" && <Input disabled={field.disabled} />}
+          {field.type === "inputNumber" && <InputNumber disabled={field.disabled} />}
+          {field.type === "select" && (
+            <Select>
+              {field.options?.map((option) => (
+                <Select.Option key={option.value} value={option.value}>
+                  {option.label}
+                </Select.Option>
+              ))}
+            </Select>
+          )}
+          {field.type === "datePicker" && <DatePicker format="YYYY-MM-DD" className="w-full" />}
+          {field.type === "checkbox" && (
+            <div className="flex items-center">
+              <input type="checkbox" className="h-6 mr-2 w-30" />
+            </div>
+          )}
+          {field.type === "switch" && <Switch />}
+        </Form.Item>
+      ))}
+      <Form.Item wrapperCol={{ ...defaultLayout.wrapperCol, offset: 8 }}>
+        <Button type="primary" htmlType="submit">
           수정
         </Button>
-        <Button type="default" style={{ marginLeft: "10px" }}>
+        <Button type="primary" onClick={handleDelete} style={{ marginLeft: "10px" }}>
           삭제
         </Button>
-        <Button type="default" style={{ marginLeft: "10px" }}>
+        <Button type="default" onClick={onClose} style={{ marginLeft: "10px" }}>
           닫기
         </Button>
       </Form.Item>

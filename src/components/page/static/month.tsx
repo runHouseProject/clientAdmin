@@ -101,7 +101,7 @@ const colData: TableListData[] = [
 type SizeType = ConfigProviderProps["componentSize"];
 
 const onChange: DatePickerProps["onChange"] = (date, dateString) => {
-  console.log(date, dateString);
+  // console.log(date, dateString);
 };
 
 const StatisticMonth = ({ data }: IStatisticSampleProps) => {
