@@ -4,6 +4,8 @@ import SortTable from "@/components/shared/table";
 import type { InputRef, TableColumnType, TableColumnsType } from "antd";
 import { getUserAttendance, getUserAttendanceList } from "@/pages/api/user";
 import { GetServerSideProps } from "next";
+import { CheckCircleTwoTone, CloseCircleTwoTone, EditTwoTone } from "@ant-design/icons";
+
 const pageHeader: IPageHeader = {
   title: "Welcome",
 };
@@ -20,7 +22,7 @@ const columnsConfig: TableColumnsType<DataType> = [
     title: "이름",
     dataIndex: "NAME",
     key: "NAME",
-    width: "15%",
+    width: "8%",
   },
   {
     title: "년생",
@@ -47,10 +49,15 @@ const columnsConfig: TableColumnsType<DataType> = [
     width: "20%",
   },
   {
-    title: "상세",
+    title: "수정 및 삭제",
     dataIndex: "KEY",
     key: "KEY",
-    render: (text) => <a href={`/user/${text}`}>View Details</a>,
+    render: (text) => (
+      <a href={`/user/${text}`}>
+        <EditTwoTone />
+      </a>
+    ),
+    width: "10%",
   },
 ];
 

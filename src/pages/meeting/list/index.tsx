@@ -5,6 +5,9 @@ import type { TableColumnsType } from "antd";
 import { GetServerSideProps } from "next";
 import { getMeetingDataAll } from "@/pages/api/meeting";
 
+import { CheckCircleTwoTone, CloseCircleTwoTone, EditTwoTone } from "@ant-design/icons";
+import { Space } from "antd";
+
 const pageHeader: IPageHeader = {
   title: "Welcome",
 };
@@ -30,29 +33,34 @@ const columnsConfig: TableColumnsType<DataType> = [
     width: "15%",
   },
   {
-    title: "개설자",
+    title: "개설여부",
     dataIndex: "founder",
     key: "founder",
     width: "15%",
-    render: (text) => (text ? "Yes" : "No"),
+    render: (text) =>
+      text ? <CheckCircleTwoTone twoToneColor="#52c41a" /> : <CloseCircleTwoTone twoToneColor="#eb2f96" />,
   },
   {
-    title: "참가자 이름",
+    title: "이름",
     dataIndex: "participantName",
     key: "participantName",
     width: "20%",
   },
   {
-    title: "출석체크 진행시간",
+    title: "출석체크시간",
     dataIndex: "checkInTime",
     key: "checkInTime",
-    width: "20%",
+    width: "15%",
   },
   {
-    title: "상세",
+    title: "수정/삭제",
     dataIndex: "key",
     key: "key",
-    render: (text) => <a href={`/meeting/${text}`}>수정 및 삭제</a>,
+    render: (text) => (
+      <a href={`/meeting/${text}`}>
+        <EditTwoTone />
+      </a>
+    ),
   },
 ];
 
