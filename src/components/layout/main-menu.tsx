@@ -31,6 +31,13 @@ const mainMenuData: IMenu[] = [
           path: "/meeting/calendar",
         },
       },
+      {
+        id: "locationList",
+        name: "장소",
+        link: {
+          path: "/meeting/location",
+        },
+      },
     ],
   },
   {
@@ -97,6 +104,9 @@ const MainMenu = () => {
       <>
         <Menu data={devMenuData} />
       </>
+      {/* <>
+        <Menu data={devMenuData} />
+      </> */}
     </>
   );
 };
