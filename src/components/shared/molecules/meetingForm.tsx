@@ -34,6 +34,7 @@ interface MeetingFormProps {
 }
 
 const MeetingForm: React.FC<MeetingFormProps> = ({ meeting, fields, onFormFinish, onDelete, onClose, layout }) => {
+  // console.log("meeting1111166666: ", meeting);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -83,7 +84,7 @@ const MeetingForm: React.FC<MeetingFormProps> = ({ meeting, fields, onFormFinish
         <Form.Item
           key={field.name}
           name={field.name}
-          label={<div className="text-2xl font-semibold grow">{field.label}</div>} // Tailwind CSS 적용
+          label={<div className="font-semibold text-1xl grow">{field.label}</div>} // Tailwind CSS 적용
         >
           {field.type === "input" && <Input disabled={field.disabled} />}
           {field.type === "inputNumber" && <InputNumber disabled={field.disabled} />}

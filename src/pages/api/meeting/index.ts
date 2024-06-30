@@ -53,6 +53,8 @@ export async function getMeetingDataAll(): Promise<MeetingData[]> {
     .order("meeting_date", { ascending: false })
     .order("founder", { ascending: false });
 
+  console.log("data:33333 ", data);
+
   if (error) {
     console.error("Error fetching data:", error);
     return [];
@@ -301,4 +303,49 @@ export async function deleteMeetingDataById(id: string): Promise<{ data: any; er
   }
 
   return { data, error };
+}
+
+interface MeetingMember {
+  name: string;
+  avatar: string;
+  meetingId: string;
+  meetingPlace: string;
+  meetingDetailPlace: string;
+  meetingTime: string;
+}
+
+export async function getMeetingDate(meetingDate: string): Promise<MeetingMember[]> {
+  const { data, error } = await supabase
+    .from("meeting")
+    .select(
+      `
+      _id,
+      created_at,
+      name,
+      birthYear,
+      accountId,
+      meeting_date,
+      location (name, detail)
+    `
+    )
+    .eq("meeting_date", meetingDate);
+  //console.log("meetingDate: ", meetingDate);
+
+  // data
+  //console.log("data: ", data);
+  // error
+  //console.log("error: ", error);
+  if (error) {
+    console.error("Error fetching data:", error);
+    return [];
+  }
+
+  return data.map((item: any) => ({
+    name: `${item.name} (${item.birthYear})`,
+    avatar: "https://github.com/shadcn.png", // 고정된 아바타 URL
+    meetingId: item._id,
+    meetingPlace: item.location.name,
+    meetingDetailPlace: item.location.detail,
+    meetingTime: item.meeting_date,
+  }));
 }

@@ -59,7 +59,7 @@ const mainMenuData: IMenu[] = [
 const devMenuData: IMenu[] = [
   {
     id: "dev",
-    name: "분석",
+    name: "보고서",
     icon: <Monitor className="w-5 h-5" />,
     submenu: [
       {
@@ -95,10 +95,6 @@ const MainMenu = () => {
         <Menu data={mainMenuData} />
       </>
       <>
-        <Divider orientation="left" plain>
-          분석
-        </Divider>
-
         <Menu data={devMenuData} />
       </>
     </>

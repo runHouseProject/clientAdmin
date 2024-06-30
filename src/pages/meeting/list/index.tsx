@@ -88,7 +88,6 @@ interface IndexPageProps {
 
 const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ data }) => {
   const { session } = useAuth();
-  // const { data, error } = useDashboard();
   return (
     <>
       <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2>

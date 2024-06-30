@@ -5,7 +5,7 @@
 get_user_attendance()
 
 SELECT
-  u."accountId" AS KEY,
+  u."_id" AS KEY,
   u.name AS NAME,
   u."birthYear"::INT AS birthYear,
   COUNT(m._id) AS attendance,
@@ -19,7 +19,47 @@ FROM
   public."user" u
   LEFT JOIN public.meeting m ON u."accountId" = m."accountId"
 GROUP BY
-  u."accountId",
+  u."_id",
   u.name,
   u."birthYear",
   u.created_at
+
+-- Supabase AI is experimental and may produce incorrect answers
+-- Always verify the output before executing
+
+-- CREATE
+-- OR REPLACE FUNCTION public.get_user_details_and_meeting_counts (account_id TEXT) RETURNS TABLE (
+--   KEY TEXT,
+--   NAME TEXT,
+--   birthYear INT,
+--   email TEXT,
+--   attendance BIGINT,
+--   meetings BIGINT,
+--   joinDate TEXT
+-- ) AS $$
+-- BEGIN
+--     RETURN QUERY
+--     SELECT
+--         u."accountId" AS KEY,
+--         u.name AS NAME,
+--         u."birthYear"::INT AS birthYear,
+--         u.email AS email,
+--         COUNT(m._id) AS attendance,
+--         COUNT(DISTINCT CASE
+--                 WHEN m.founder = TRUE THEN m._id
+--             END
+--         ) AS meetings,
+--         TO_CHAR(u.created_at, 'YYYY-MM-DD') AS joinDate
+--     FROM
+--         public."user" u
+--     LEFT JOIN public.meeting m ON u."accountId" = m."accountId"
+--     WHERE u."accountId" = account_id
+--     GROUP BY
+--         u."accountId",
+--         u.name,
+--         u."birthYear",
+--         u.created_at;
+-- END;
+-- $$ LANGUAGE plpgsql;
+
+select public.get_user_details_and_meeting_counts('2413826649')

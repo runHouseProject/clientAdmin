@@ -3,6 +3,7 @@ import { getDefaultLayout, IDefaultLayoutPage, IPageHeader } from "@/components/
 import MeetingForm from "@/components/shared/molecules/MeetingForm";
 import { useAuth } from "@/lib/auth/auth-provider";
 import { deleteMeetingDataById, getMeetingDateById, updateMeeting } from "@/pages/api/meeting";
+import { getUserInfoById } from "@/pages/api/user";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 
@@ -25,12 +26,14 @@ interface FormField {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
+  console.log("id: ", id);
 
   try {
-    const meeting = await getMeetingDateById(id); //유저 정보 가져오기
+    const userData = await getUserInfoById(id);
+    console.log("meeting: 1111111111111111", userData);
     return {
       props: {
-        meeting,
+        userData,
       },
     };
   } catch (error) {
@@ -41,47 +44,27 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 interface IndexPageProps {
-  meeting: any;
+  userData: any;
 }
 
-const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ meeting }) => {
+const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ userData }) => {
   const { session } = useAuth();
   const router = useRouter();
 
   const fields: FormField[] = [
-    { name: "participantName", label: "이름", type: "input", disabled: true },
-    { name: "birthYear", label: "년생", type: "inputNumber", disabled: true },
-    { name: "meeting_date", label: "참여일", type: "datePicker" },
-    { name: "founder", label: "개설자 여부", type: "switch" },
-    {
-      name: "activation",
-      label: "활동",
-      type: "select",
-      options: [
-        { value: "러닝", label: "러닝" },
-        { value: "등산", label: "등산" },
-        { value: "자전거", label: "자전거" },
-        { value: "기타", label: "기타" },
-      ],
-    },
-    {
-      name: "location",
-      label: "장소",
-      type: "select",
-      options: [
-        { value: "태평", label: "태평" },
-        { value: "야탑", label: "야탑" },
-        { value: "모란", label: "모란" },
-      ],
-    },
+    { name: "NAME", label: "이름", type: "input" },
+    { name: "birthYear", label: "년생", type: "input", disabled: true },
+    { name: "email", label: "이메일", type: "input" },
+    { name: "attendance", label: "참여 횟수", type: "input", disabled: true },
+    { name: "meetings", label: "개설자 횟수", type: "input", disabled: true },
+    { name: "joinDate", label: "가입 일", type: "datePicker" },
   ];
 
   const handleFormFinish = async (values: any) => {
     console.log("Form values:3333333", values);
     // API 호출 예시
     try {
-      await updateMeeting(values);
-
+      // await updateMeeting(values);
       router.push("/meeting/list"); // 이전 페이지로 이동
     } catch (error) {
       console.error("Failed to update meeting:", error);
@@ -92,7 +75,7 @@ const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ meeting }) => {
     console.log("Delete meeting with id:3333333", id);
     // API 호출 예시
     try {
-      await deleteMeetingDataById(id);
+      // await deleteMeetingDataById(id);
       router.push("/meeting/list"); // 이전 페이지로 이동
     } catch (error) {
       console.error("Failed to delete meeting:", error);
@@ -107,7 +90,7 @@ const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ meeting }) => {
     <>
       <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2>
       <MeetingForm
-        meeting={meeting}
+        meeting={userData}
         fields={fields}
         onFormFinish={handleFormFinish}
         onDelete={handleDelete}

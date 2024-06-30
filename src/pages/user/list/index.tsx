@@ -79,8 +79,6 @@ interface IndexPageProps {
 }
 
 const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ data }) => {
-  // const todayMeetingCount: number = await getDayMeetingCount(todayDate_kst);
-
   const { session } = useAuth();
   // const { data, error } = useDashboard();
   return (

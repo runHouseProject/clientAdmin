@@ -36,30 +36,23 @@ export async function getUserAttendance(): Promise<getUserAttendanceList[]> {
 
 //유저 삭제 (활동여부 false 처리)
 export async function deleteUser(userId: string) {
-  //console.log("userId: ", userId);
-  // const { data, error } = await supabase.from("user").delete().eq("id", userId);
+  console.log("deleteUser userId: ", userId);
 
   const { data, error } = await supabase.from("user").update({ activation: false }).eq("id", userId).select();
+  console.log("deleteUser data: ", data);
 
-  //console.log("userId: ", userId);
-
-  // data
-  //console.log("data: ", data);
-  // error
-  //console.log("error: ", error);
   if (error) {
     console.error("Error fetching data:", error);
   }
 }
 
 //한명의 유저 정보상세
-export async function getUserInfoDetailsAndMeetingCounts(userId: string) {
-  const { data, error } = await supabase.rpc("get_user_info_details_and_meeting_counts", { user_id: userId });
+export async function getUserInfoById(accountId: string) {
+  console.log("getUserInfoById userId: ", accountId);
 
-  // data
-  // //console.log("data: ", data);
-  // // error
-  // //console.log("error: ", error);
+  const { data, error } = await supabase.rpc("get_user_details_and_meeting_counts", { account_id: accountId });
+
+  console.log("data: ", data);
 
   if (error) {
     console.error("Error executing query:", error);
@@ -70,62 +63,15 @@ export async function getUserInfoDetailsAndMeetingCounts(userId: string) {
     return null;
   }
 
+  const firstItem = data[0];
+
   return {
-    UserInfo: {
-      nameAndBirthYear: `${data[0].name} (${data[0].birth_year})`,
-      grade: data[0].activation ? "Active" : "Inactive",
-      createdAt: new Date().toLocaleDateString(), // createdAt 정보가 없으므로 현재 날짜로 대체
-    },
-    UserInfoDetail: {
-      email: data[0].email,
-      phoneNumber: data[0].phoneNumber || "", // phoneNumber 정보가 없으므로 빈 문자열로 대체
-      participationCount: data[0].participation_count,
-      openingsCount: data[0].meeting_count,
-    },
+    KEY: firstItem.key ?? "N/A",
+    NAME: firstItem.name ?? "N/A",
+    birthYear: firstItem.birthyear ?? "N/A",
+    email: firstItem.email ?? "N/A",
+    attendance: firstItem.attendance ?? "N/A",
+    meetings: firstItem.meetings ?? "N/A",
+    joinDate: firstItem.joindate ?? "N/A",
   };
-}
-
-interface MeetingMember {
-  name: string;
-  avatar: string;
-  meetingId: string;
-  meetingPlace: string;
-  meetingDetailPlace: string;
-  meetingTime: string;
-}
-
-export async function getMeetingDate(meetingDate: string): Promise<MeetingMember[]> {
-  const { data, error } = await supabase
-    .from("meeting")
-    .select(
-      `
-      _id,
-      created_at,
-      name,
-      birthYear,
-      accountId,
-      meeting_date,
-      location (name, detail)
-    `
-    )
-    .eq("meeting_date", meetingDate);
-  //console.log("meetingDate: ", meetingDate);
-
-  // data
-  //console.log("data: ", data);
-  // error
-  //console.log("error: ", error);
-  if (error) {
-    console.error("Error fetching data:", error);
-    return [];
-  }
-
-  return data.map((item: any) => ({
-    name: `${item.name} (${item.birthYear})`,
-    avatar: "https://github.com/shadcn.png", // 고정된 아바타 URL
-    meetingId: item._id,
-    meetingPlace: item.location.name,
-    meetingDetailPlace: item.location.detail,
-    meetingTime: item.meeting_date,
-  }));
 }
