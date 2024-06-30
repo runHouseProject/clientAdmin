@@ -33,6 +33,12 @@ const columnsConfig: TableColumnsType<DataType> = [
     width: "15%",
   },
   {
+    title: "활동",
+    dataIndex: "activation",
+    key: "activation",
+    width: "15%",
+  },
+  {
     title: "개설여부",
     dataIndex: "founder",
     key: "founder",
@@ -64,12 +70,11 @@ const columnsConfig: TableColumnsType<DataType> = [
   },
 ];
 
-const searchableColumns: DataIndex[] = ["openDate", "meeting_date", "location", "participantName"];
+const searchableColumns: DataIndex[] = ["openDate", "meeting_date", "location", "participantName", "activation"];
 const sortableColumns: DataIndex[] = ["openDate", "founder", "meeting_date"];
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const data = await getMeetingDataAll();
-
   return {
     props: {
       data,

@@ -49,6 +49,7 @@ export async function getMeetingDataAll(): Promise<MeetingData[]> {
       location:location ( name )
     `
     )
+    .or("delete.is.null,delete.eq.false")
     .order("meeting_date", { ascending: false })
     .order("founder", { ascending: false });
 
@@ -162,7 +163,7 @@ interface SupabaseMeetingData {
  * @returns {Promise<MeetingData>} 모임 데이터를 가져오는 데 성공하면 해당 모임 데이터를 반환합니다.
  * @throws {Error} 모임 데이터를 가져오는 데 실패하면 에러를 던집니다.
  */
-export async function getMeetingDateByid(id: string): Promise<MeetingData> {
+export async function getMeetingDateById(id: string): Promise<MeetingData> {
   const { data, error } = await supabase
     .from("meeting")
     .select(
@@ -215,6 +216,11 @@ interface UpdateMeetingParams {
   location?: string;
 }
 
+/**
+ * 특정 ID의 모임 데이터를 수정합니다.
+ * @param param0
+ * @returns
+ */
 export async function updateMeeting({
   id,
   name,
@@ -264,6 +270,29 @@ export async function updateMeeting({
 
   if (error) {
     console.error(error);
+    throw new Error("Failed to fetch meeting data");
+  }
+
+  if (!data) {
+    throw new Error("Meeting data not found");
+  }
+
+  return { data, error };
+}
+
+/**
+ * 특정 ID의 모임 데이터를 수정합니다.
+ * @param param0
+ * @returns
+ */
+export async function deleteMeetingDataById(id: string): Promise<{ data: any; error: any }> {
+  let updates: any = { updated_at: new Date().toISOString() };
+  if (id) updates.delete = true;
+  const { data, error } = await supabase.from("meeting").update(updates).eq("_id", id).select();
+  console.log("data333: ", data);
+  console.log("error333: ", error);
+
+  if (error) {
     throw new Error("Failed to fetch meeting data");
   }
 

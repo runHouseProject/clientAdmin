@@ -18,14 +18,14 @@ const mainMenuData: IMenu[] = [
     icon: <Package2 className="w-5 h-5" />,
     submenu: [
       {
-        id: "productList",
-        name: "참여 리스트",
+        id: "meetingList",
+        name: "모임",
         link: {
           path: "/meeting/list",
         },
       },
       {
-        id: "productStatic",
+        id: "meetingCalendar",
         name: "달력",
         link: {
           path: "/meeting/calendar",
@@ -40,9 +40,16 @@ const mainMenuData: IMenu[] = [
     submenu: [
       {
         id: "userList",
-        name: "회원 정보",
+        name: "회원",
         link: {
           path: "/user/list",
+        },
+      },
+      {
+        id: "userCalendar",
+        name: "달력",
+        link: {
+          path: "/user/calendar",
         },
       },
     ],

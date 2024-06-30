@@ -2,7 +2,7 @@
 import { getDefaultLayout, IDefaultLayoutPage, IPageHeader } from "@/components/layout/default-layout";
 import MeetingForm from "@/components/shared/molecules/MeetingForm";
 import { useAuth } from "@/lib/auth/auth-provider";
-import { getMeetingDateByid, updateMeeting } from "@/pages/api/meeting";
+import { deleteMeetingDataById, getMeetingDateById, updateMeeting } from "@/pages/api/meeting";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 
@@ -27,7 +27,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
 
   try {
-    const meeting = await getMeetingDateByid(id);
+    const meeting = await getMeetingDateById(id);
     return {
       props: {
         meeting,
@@ -59,8 +59,9 @@ const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ meeting }) => {
       type: "select",
       options: [
         { value: "러닝", label: "러닝" },
-        { value: "회의", label: "회의" },
-        { value: "토론", label: "토론" },
+        { value: "등산", label: "등산" },
+        { value: "자전거", label: "자전거" },
+        { value: "기타", label: "기타" },
       ],
     },
     {
@@ -69,8 +70,8 @@ const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ meeting }) => {
       type: "select",
       options: [
         { value: "태평", label: "태평" },
-        { value: "강남", label: "강남" },
-        { value: "홍대", label: "홍대" },
+        { value: "야탑", label: "야탑" },
+        { value: "모란", label: "모란" },
       ],
     },
   ];
@@ -91,13 +92,7 @@ const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ meeting }) => {
     console.log("Delete meeting with id:3333333", id);
     // API 호출 예시
     try {
-      // const response = await fetch(`/api/meetings/delete/${id}`, {
-      //   method: "DELETE",
-      // });
-      // if (!response.ok) {
-      //   throw new Error("Failed to delete meeting");
-      // }
-      // // 성공적으로 삭제된 경우 처리
+      await deleteMeetingDataById(id);
       router.push("/meeting/list"); // 이전 페이지로 이동
     } catch (error) {
       console.error("Failed to delete meeting:", error);
