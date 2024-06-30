@@ -2,6 +2,8 @@ import { getDefaultLayout, IDefaultLayoutPage, IPageHeader } from "@/components/
 import { useAuth } from "@/lib/auth/auth-provider";
 import SortTable from "@/components/shared/table";
 import type { InputRef, TableColumnType, TableColumnsType } from "antd";
+import { getUserAttendance, getUserAttendanceList } from "@/pages/api/user";
+import { GetServerSideProps } from "next";
 const pageHeader: IPageHeader = {
   title: "Welcome",
 };
@@ -13,46 +15,18 @@ interface DataType {
 
 type DataIndex = keyof DataType;
 
-const data: DataType[] = [
-  {
-    key: "1",
-    name: "John Brown",
-    birthYear: 1990,
-    attendance: 32,
-    meetings: 3,
-    joinDate: "2022-01-01",
-  },
-  {
-    key: "2",
-    name: "Joe Black",
-    birthYear: 1985,
-    attendance: 42,
-    meetings: 5,
-    joinDate: "2021-05-10",
-  },
-  {
-    key: "3",
-    name: "Jim Green",
-    birthYear: 1992,
-    attendance: 15,
-    meetings: 1,
-    joinDate: "2023-03-15",
-  },
-  // ... (other data entries)
-];
-
 const columnsConfig: TableColumnsType<DataType> = [
   {
     title: "이름",
-    dataIndex: "name",
-    key: "name",
-    width: "20%",
+    dataIndex: "NAME",
+    key: "NAME",
+    width: "15%",
   },
   {
     title: "년생",
     dataIndex: "birthYear",
     key: "birthYear",
-    width: "10%",
+    width: "8%",
   },
   {
     title: "출석횟수",
@@ -73,17 +47,33 @@ const columnsConfig: TableColumnsType<DataType> = [
     width: "20%",
   },
   {
-    title: "유저상세",
-    dataIndex: "key",
-    key: "key",
+    title: "상세",
+    dataIndex: "KEY",
+    key: "KEY",
     render: (text) => <a href={`/user/${text}`}>View Details</a>,
   },
 ];
 
-const searchableColumns: DataIndex[] = ["name", "birthYear", "attendance", "meetings"];
+const searchableColumns: DataIndex[] = ["NAME", "birthYear", "attendance", "meetings"];
 const sortableColumns: DataIndex[] = ["birthYear", "attendance", "meetings", "joinDate"];
 
-const IndexPage: IDefaultLayoutPage = () => {
+export const getServerSideProps: GetServerSideProps = async () => {
+  const data = await getUserAttendance();
+
+  return {
+    props: {
+      data,
+    },
+  };
+};
+
+interface IndexPageProps {
+  data: DataType[];
+}
+
+const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ data }) => {
+  // const todayMeetingCount: number = await getDayMeetingCount(todayDate_kst);
+
   const { session } = useAuth();
   // const { data, error } = useDashboard();
   return (

@@ -19,7 +19,7 @@ const mainMenuData: IMenu[] = [
     submenu: [
       {
         id: "productList",
-        name: "모임",
+        name: "참여 리스트",
         link: {
           path: "/meeting/list",
         },
@@ -35,12 +35,12 @@ const mainMenuData: IMenu[] = [
   },
   {
     id: "user",
-    name: "크루원",
+    name: "회원",
     icon: <Package2 className="w-5 h-5" />,
     submenu: [
       {
         id: "userList",
-        name: "크루원",
+        name: "회원 정보",
         link: {
           path: "/user/list",
         },
@@ -52,17 +52,23 @@ const mainMenuData: IMenu[] = [
 const devMenuData: IMenu[] = [
   {
     id: "dev",
-    name: "데이터 통계",
+    name: "분석",
     icon: <Monitor className="w-5 h-5" />,
     submenu: [
       {
-        name: "월간",
+        name: "월간지표",
         link: {
           path: "/static/month",
         },
       },
       {
-        name: "모임",
+        name: "유저",
+        link: {
+          path: "/static/user",
+        },
+      },
+      {
+        name: "장소",
         link: {
           path: "/static/meeting",
         },

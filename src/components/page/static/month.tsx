@@ -112,32 +112,8 @@ const StatisticMonth = ({ data }: IStatisticSampleProps) => {
   };
   return (
     <>
-      {/* <Radio.Group value={size} onChange={handleSizeChange}>
-        <Radio.Button value="large">Large</Radio.Button>
-        <Radio.Button value="middle">middle</Radio.Button>
-        <Radio.Button value="small">Small</Radio.Button>
-      </Radio.Group> */}
-      {/* <DatePicker size={size} />
-      <DatePicker size={size} picker="month" /> */}
-      {/* <DatePicker size={"middle"} picker="month" /> */}
-
       <div className="px-1 py-3">
-        {/* <ConfigProvider locale={locale}>
-          <DatePicker className="custom-date-picker" onChange={onChange} size="middle" picker="month" />
-        </ConfigProvider> */}
-
-        <ConfigProvider
-          locale={locale}
-          // theme={{
-          //   components: {
-          //     DatePicker: {
-          //       addonBg: "#1DA57A", // 테두리 색상 설정
-          //       borderRadius: 2, // 테두리 둥글기 설정
-          //       activeBorderColor: "#1677ff",
-          //     },
-          //   },
-          // }}
-        >
+        <ConfigProvider locale={locale}>
           <DatePicker
             style={{
               border: "2px solid #40CC70", // 테두리 두께 및 색상 설정
