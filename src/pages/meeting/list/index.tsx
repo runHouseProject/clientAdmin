@@ -43,8 +43,9 @@ const columnsConfig: TableColumnsType<DataType> = [
     dataIndex: "founder",
     key: "founder",
     width: "15%",
-    render: (text) =>
-      text ? <CheckCircleTwoTone twoToneColor="#52c41a" /> : <CloseCircleTwoTone twoToneColor="#eb2f96" />,
+    // render: (text) => (text ? "yes" : "no"),
+    // render: (text) =>
+    //   text ? <CheckCircleTwoTone twoToneColor="#52c41a" /> : <CloseCircleTwoTone twoToneColor="#eb2f96" />,
   },
   {
     title: "이름",
@@ -70,7 +71,14 @@ const columnsConfig: TableColumnsType<DataType> = [
   },
 ];
 
-const searchableColumns: DataIndex[] = ["openDate", "meeting_date", "location", "participantName", "activation"];
+const searchableColumns: DataIndex[] = [
+  "founder",
+  "openDate",
+  "meeting_date",
+  "location",
+  "participantName",
+  "activation",
+];
 const sortableColumns: DataIndex[] = ["openDate", "founder", "meeting_date"];
 
 export const getServerSideProps: GetServerSideProps = async () => {

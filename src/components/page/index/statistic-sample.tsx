@@ -1,6 +1,7 @@
 import { IDashboardResponse } from "@/client/sample/dashboard";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
+
 import CountUp from "react-countup";
 import { LineChartComponent, TinyAreaChartComponent, BasicLineChart } from "@/components/shared/chart";
 import { BasicBarChart, MultiBarChart, StackedBarChart } from "@/components/shared/barChart";
@@ -8,6 +9,11 @@ import { BasicPieChart, DonutPieChart, CustomLabelPieChart } from "@/components/
 import ProcessDivComponent from "@/components/shared/Organism/processDiv";
 import AttendanceProgressComponent, { ProgressBarData } from "@/components/shared/Organism/AttendanceProgress";
 import UserCountComponent, { TableListData } from "@/components/shared/userCountComponent";
+import { getCurrentMonthInfoWithPercent } from "@/pages/api/utils";
+import { getActiveUserCount } from "@/pages/api/user";
+import { GetServerSideProps } from "next";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Space, Spin } from "antd";
 
 interface IStatisticSampleProps {
   data: IDashboardResponse;
@@ -31,8 +37,6 @@ const renderChangeRate = (value: number) => {
   }
 };
 
-const AttendanceData: ProgressBarData[] = [{ label: "7월", percent: 1 }];
-
 const colData: TableListData[] = [
   { no: 1, name: "김건우 (99)", count: 90 },
   { no: 2, name: "송영규 (99)", count: 80 },
@@ -41,7 +45,35 @@ const colData: TableListData[] = [
   { no: 5, name: "전현진 (00)", count: 30 },
 ];
 
+export const getServerSideProps: GetServerSideProps = async () => {
+  const activeUserCount = await getActiveUserCount();
+  console.log("activeUserCount:11 ", activeUserCount);
+
+  return {
+    props: {
+      activeUserCount,
+    },
+  };
+};
+
 const StatisticSample = ({ data }: IStatisticSampleProps) => {
+  console.log("data: ", data);
+  const result = getCurrentMonthInfoWithPercent();
+
+  const AttendanceData: ProgressBarData[] = [result];
+
+  const [activeUserCount, setActiveUserCount] = useState<number | null>(null);
+  console.log("activeUserCount: ", activeUserCount);
+
+  useEffect(() => {
+    const fetchActiveUserCount = async () => {
+      const count = await getActiveUserCount();
+      setActiveUserCount(count);
+    };
+
+    fetchActiveUserCount();
+  }, []);
+
   return (
     <>
       <div className="p-1">
@@ -55,7 +87,12 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
               <div className="mt-3">
                 <div className="flex items-center mt-3">
                   <div className="text-2xl font-semibold grow">
-                    <CountUp end={data.visitor.value} separator="," />명
+                    {activeUserCount !== null ? (
+                      <CountUp end={activeUserCount} separator="," />
+                    ) : (
+                      <Spin indicator={<LoadingOutlined spin />} size="small" />
+                    )}
+                    명
                   </div>
                   <div>{renderChangeRate(data.visitor.rate)}</div>
                 </div>

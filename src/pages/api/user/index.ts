@@ -75,3 +75,24 @@ export async function getUserInfoById(accountId: string) {
     joinDate: firstItem.joindate ?? "N/A",
   };
 }
+
+export async function getActiveUserCount() {
+  const { data, error, count } = await supabase.from("user").select("*", { count: "exact" }).eq("activation", true);
+  console.log("count4444:33 ", count);
+  console.log("data111111: ", data);
+
+  if (error) {
+    console.error("Error fetching count:", error);
+    return null;
+  } else {
+    console.log("Count of rows where activation is true:", count);
+  }
+
+  if (data.length === 0) {
+    return null;
+  }
+
+  const result: number | null = count;
+
+  return count;
+}

@@ -22,7 +22,7 @@ interface MeetingData {
   participantName: string;
   meeting_date: string;
   birthYear: number;
-  founder: boolean;
+  founder: string;
   checkInTime: string;
   activation: { name: string } | any;
   location: { name: string } | any;
@@ -66,7 +66,7 @@ export async function getMeetingDataAll(): Promise<MeetingData[]> {
     participantName: meeting.name ?? "N/A",
     meeting_date: meeting.meeting_date ?? "N/A",
     birthYear: meeting.birthYear ?? 0,
-    founder: meeting.founder ?? false,
+    founder: meeting.founder ? "YES" : "NO",
     checkInTime: dayjs(meeting.created_at).format("YYYY-MM-DD HH:mm") ?? "N/A", // created_at 포맷팅
     activation: meeting.activation?.name ?? "N/A",
     location: meeting.location?.name ?? "N/A",
@@ -201,7 +201,7 @@ export async function getMeetingDateById(id: string): Promise<MeetingData> {
     participantName: meetingData.name ?? "N/A",
     meeting_date: meetingData.meeting_date ?? "N/A",
     birthYear: parseInt(meetingData.birthYear) ?? 0, // '93' -> 93
-    founder: meetingData.founder ?? false,
+    founder: meetingData.founder ? "YES" : "NO",
     checkInTime: dayjs(meetingData.created_at).format("YYYY-MM-DD HH:mm") ?? "N/A",
     activation: meetingData.activation?.name ?? "N/A",
     location: meetingData.location?.name ?? "N/A",
