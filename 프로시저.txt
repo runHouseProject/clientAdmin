@@ -63,3 +63,313 @@ GROUP BY
 -- $$ LANGUAGE plpgsql;
 
 select public.get_user_details_and_meeting_counts('2413826649')
+
+
+
+
+<get_meeting_count_by_month>================================================================
+<월별 모임 개설 건수 파악>
+CALL get_meeting_count_by_month(2023, 1);
+================================================================
+CREATE OR REPLACE PROCEDURE get_meeting_count_by_month(
+    p_year INTEGER,
+    p_month INTEGER
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        EXTRACT(MONTH FROM meeting.meeting_date::TIMESTAMP WITHOUT TIME ZONE) AS month,
+        COUNT(CASE WHEN meeting.founder = TRUE THEN 1 ELSE NULL::INTEGER END) AS founder_count
+    FROM
+        meeting
+    WHERE
+        EXTRACT(YEAR FROM meeting.meeting_date::TIMESTAMP WITHOUT TIME ZONE) = p_year
+        AND EXTRACT(MONTH FROM meeting.meeting_date::TIMESTAMP WITHOUT TIME ZONE) = p_month
+    GROUP BY
+        EXTRACT(MONTH FROM meeting.meeting_date::TIMESTAMP WITHOUT TIME ZONE)
+    ORDER BY
+        EXTRACT(MONTH FROM meeting.meeting_date::TIMESTAMP WITHOUT TIME ZONE);
+END;
+$$;
+
+
+
+<get_meeting_count_by_date_range>================================================================
+<월별 모임 개설 건수 파악  날짜 범위에서>
+CALL get_meeting_count_by_date_range(2023, 1, 2024, 9);
+================================================================
+CREATE OR REPLACE PROCEDURE get_meeting_count_by_date_range(
+    p_start_year INTEGER,
+    p_start_month INTEGER,
+    p_end_year INTEGER,
+    p_end_month INTEGER
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    WITH date_series AS (
+        SELECT 
+            (date_trunc('month', generate_series(
+                MAKE_TIMESTAMP(p_start_year, p_start_month, 1, 0, 0, 0),
+                MAKE_TIMESTAMP(p_end_year, p_end_month, 1, 0, 0, 0),
+                '1 month'::interval
+            )))::timestamp AS month_start
+    )
+    SELECT
+        EXTRACT(YEAR FROM ds.month_start) AS year,
+        EXTRACT(MONTH FROM ds.month_start) AS month,
+        COALESCE(COUNT(m.meeting_date), 0) AS founder_count
+    FROM
+        date_series ds
+        LEFT JOIN meeting m ON EXTRACT(YEAR FROM m.meeting_date::TIMESTAMP WITHOUT TIME ZONE) = EXTRACT(YEAR FROM ds.month_start)
+        AND EXTRACT(MONTH FROM m.meeting_date::TIMESTAMP WITHOUT TIME ZONE) = EXTRACT(MONTH FROM ds.month_start)
+        AND m.founder = TRUE
+    GROUP BY
+        ds.month_start
+    ORDER BY
+        ds.month_start;
+END;
+$$;
+
+
+<get_meeting_count_by_date_range>================================================================
+<월별 유저 수 활동중인>
+CALL get_user_count_for_period(2023, 1, 2024, 9);
+================================================================
+CREATE OR REPLACE FUNCTION user_count_for_period(
+  start_year INT, 
+  start_month INT, 
+  end_year INT, 
+  end_month INT
+)
+RETURNS TABLE (
+  YEAR INT,
+  MONTH INT,
+  user_count INT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    EXTRACT(YEAR FROM created_at) AS YEAR,
+    EXTRACT(MONTH FROM created_at) AS MONTH,
+    COUNT(*) AS user_count
+  FROM
+    public.user
+  WHERE
+    created_at >= MAKE_TIMESTAMP(start_year, start_month, 1, 0, 0, 0)
+    AND created_at < MAKE_TIMESTAMP(end_year, end_month, 1, 0, 0, 0) + INTERVAL '1 MONTH'
+    AND activation = TRUE
+  GROUP BY
+    EXTRACT(YEAR FROM created_at),
+    EXTRACT(MONTH FROM created_at)
+  ORDER BY
+    YEAR DESC,
+    MONTH DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+<get_meeting_count_by_date_range>================================================================
+<월별 모임 수>
+CALL get_meeting_count_for_period(2023, 1, 2024, 9);
+================================================================
+CREATE OR REPLACE FUNCTION get_meeting_count_for_period(
+  start_year INT, 
+  start_month INT, 
+  end_year INT, 
+  end_month INT
+)
+RETURNS TABLE (
+  YEAR INT,
+  MONTH INT,
+  meeting_count INT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    EXTRACT(YEAR FROM meeting_date) AS YEAR,
+    EXTRACT(MONTH FROM meeting_date) AS MONTH,
+    COUNT(*) AS meeting_count
+  FROM
+    public.meeting
+  WHERE
+    meeting_date >= MAKE_TIMESTAMP(start_year, start_month, 1, 0, 0, 0)
+    AND meeting_date < MAKE_TIMESTAMP(end_year, end_month, 1, 0, 0, 0) + INTERVAL '1 MONTH'
+    AND (delete IS NULL OR delete = FALSE)
+  GROUP BY
+    EXTRACT(YEAR FROM meeting_date),
+    EXTRACT(MONTH FROM meeting_date)
+  ORDER BY
+    YEAR DESC,
+    MONTH DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+<get_distinct_user_for_period_by_month>================================================================
+<월별 참여한번이라도 한 인원 파악>
+CALL get_meeting_count_for_period(2023, 1, 2024, 9);
+================================================================
+CREATE OR REPLACE FUNCTION get_distinct_user_for_period_by_month(
+  start_year INT, 
+  start_month INT, 
+  end_year INT, 
+  end_month INT
+)
+RETURNS TABLE (
+  year INT,
+  month INT,
+  distinct_account_count INT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    EXTRACT(YEAR FROM meeting_date) AS year,
+    EXTRACT(MONTH FROM meeting_date) AS month,
+    COUNT(DISTINCT "accountId") AS distinct_account_count
+  FROM
+    public.meeting
+  WHERE
+    meeting_date >= MAKE_TIMESTAMP(start_year, start_month, 1, 0, 0, 0)
+    AND meeting_date < MAKE_TIMESTAMP(end_year, end_month, 1, 0, 0, 0) + INTERVAL '1 MONTH'
+    AND (delete IS NULL OR delete = FALSE)
+  GROUP BY
+    EXTRACT(YEAR FROM meeting_date),
+    EXTRACT(MONTH FROM meeting_date)
+  ORDER BY
+    year DESC,
+    month DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+<get_location_meeting_percentage_for_period>================================================================
+<월별기준 장소별 참여 횟수 및 트랜드>
+CALL get_meeting_count_for_period(2023, 1, 2024, 9);
+================================================================
+CREATE OR REPLACE FUNCTION get_location_meeting_percentage_for_period(
+  start_year INT, 
+  start_month INT, 
+  end_year INT, 
+  end_month INT
+)
+RETURNS TABLE (
+  location_name TEXT,
+  month INT,
+  meeting_count INT,
+  total_meeting_count INT,
+  percentage NUMERIC
+) AS $$
+BEGIN
+  RETURN QUERY
+  WITH
+    monthly_meeting_counts AS (
+      SELECT
+        l.name AS location_name,
+        EXTRACT(MONTH FROM m.meeting_date) AS month,
+        COUNT(*) AS meeting_count
+      FROM
+        public.meeting m
+        INNER JOIN public.location l ON m.location = l.code
+      WHERE
+        m.meeting_date >= MAKE_TIMESTAMP(start_year, start_month, 1, 0, 0, 0)
+        AND m.meeting_date < MAKE_TIMESTAMP(end_year, end_month, 1, 0, 0, 0) + INTERVAL '1 MONTH'
+        AND (m.delete IS NULL OR m.delete = FALSE)
+      GROUP BY
+        l.name,
+        EXTRACT(MONTH FROM m.meeting_date)
+    ),
+    total_meeting_counts AS (
+      SELECT
+        EXTRACT(MONTH FROM meeting_date) AS month,
+        COUNT(*) AS total_meeting_count
+      FROM
+        public.meeting
+      WHERE
+        meeting_date >= MAKE_TIMESTAMP(start_year, start_month, 1, 0, 0, 0)
+        AND meeting_date < MAKE_TIMESTAMP(end_year, end_month, 1, 0, 0, 0) + INTERVAL '1 MONTH'
+        AND (delete IS NULL OR delete = FALSE)
+      GROUP BY
+        EXTRACT(MONTH FROM meeting_date)
+    )
+  SELECT
+    mmc.location_name,
+    mmc.month,
+    mmc.meeting_count,
+    tmc.total_meeting_count,
+    ROUND((mmc.meeting_count::NUMERIC / tmc.total_meeting_count) * 100, 2) AS percentage
+  FROM
+    monthly_meeting_counts mmc
+    JOIN total_meeting_counts tmc ON mmc.month = tmc.month
+  ORDER BY
+    mmc.month,
+    mmc.location_name;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+<get_age_group_meeting_percentage_for_period>================================================================
+<월별기준 나이대별 참여율>
+CALL get_meeting_count_for_period(2023, 1, 2024, 9);
+================================================================
+CREATE OR REPLACE FUNCTION get_age_group_meeting_percentage_for_period(
+  start_year INT, 
+  start_month INT, 
+  end_year INT, 
+  end_month INT
+)
+RETURNS TABLE (
+  age INT,
+  month INT,
+  meeting_count INT,
+  total_meeting_count INT,
+  participation_rate NUMERIC
+) AS $$
+BEGIN
+  RETURN QUERY
+  WITH age_groups AS (
+    SELECT
+      CASE 
+        WHEN LEFT("birthYear", 1) = '9' OR LEFT("birthYear", 1) = '8' THEN 
+          EXTRACT(YEAR FROM CURRENT_DATE) - (1900 + CAST("birthYear" AS INTEGER)) + 1
+        ELSE 
+          EXTRACT(YEAR FROM CURRENT_DATE) - (2000 + CAST("birthYear" AS INTEGER)) + 1
+      END AS age,
+      EXTRACT(MONTH FROM meeting_date) AS month,
+      COUNT(*) AS meeting_count
+    FROM
+      public.meeting
+    WHERE
+      "birthYear" IS NOT NULL
+      AND meeting_date >= MAKE_TIMESTAMP(start_year, start_month, 1, 0, 0, 0)
+      AND meeting_date < MAKE_TIMESTAMP(end_year, end_month, 1, 0, 0, 0) + INTERVAL '1 MONTH'
+    GROUP BY
+      age,
+      EXTRACT(MONTH FROM meeting_date)
+  )
+  SELECT
+    age,
+    month,
+    meeting_count,
+    SUM(meeting_count) OVER (
+      PARTITION BY month
+    ) AS total_meeting_count,
+    ROUND(
+      (
+        meeting_count::NUMERIC / SUM(meeting_count) OVER (
+          PARTITION BY month
+        )
+      ) * 100,
+      2
+    ) AS participation_rate
+  FROM
+    age_groups
+  ORDER BY
+    age,
+    month;
+END;
+$$ LANGUAGE plpgsql;
