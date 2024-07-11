@@ -349,3 +349,74 @@ export async function getMeetingDate(meetingDate: string): Promise<MeetingMember
     meetingTime: item.meeting_date,
   }));
 }
+
+// <get_meeting_count_by_date_range>================================================================
+// <월별 모임 개설 건수 파악  날짜 범위에서>
+// CALL get_meeting_count_by_date_range(2023, 1, 2024, 9);
+
+interface DataItem {
+  year: number;
+  month: number;
+  founder_count: number;
+}
+export async function getMeetingCountByDateRange(
+  p_start_year: string,
+  p_start_month: string,
+  p_end_year: string,
+  p_end_month: string
+) {
+  // console.log("getUserInfoById userId: ", accountId);
+
+  const { data, error } = await supabase.rpc("get_meeting_count_by_date_range", {
+    p_start_year: parseInt(p_start_year),
+    p_start_month: parseInt(p_start_month),
+    p_end_year: parseInt(p_end_year),
+    p_end_month: parseInt(p_end_month),
+  });
+
+  console.log("data get_meeting_count_by_date_range: ", data);
+
+  function getThisMonthFounderCount(data: DataItem[]) {
+    if (!data || data.length === 0) {
+      return null;
+    }
+    const lastElement = data[data.length - 1];
+    return lastElement.founder_count;
+  }
+
+  // data 배열의 첫 번째와 두 번째 객체에서 founder_count 값을 가져와 변화율을 계산해 반환하는 함수
+  function getDiffLastMonth(data: DataItem[]) {
+    if (!data || data.length < 2) {
+      return null;
+    }
+
+    const firstElement = data[0];
+    const secondElement = data[1];
+
+    const firstCount = firstElement.founder_count;
+    const secondCount = secondElement.founder_count;
+
+    if (firstCount === 0 || secondCount === 0) {
+      return null;
+    }
+
+    return (secondCount / firstCount) * 100;
+  }
+
+  if (error) {
+    console.error("Error executing query:", error);
+    return null;
+  }
+
+  if (data.length === 0) {
+    return null;
+  }
+
+  const thisMonthFounderCount = getThisMonthFounderCount(data);
+  const diffLastMonthRate = getDiffLastMonth(data);
+
+  return {
+    thisMonthFounderCount,
+    diffLastMonthRate,
+  };
+}

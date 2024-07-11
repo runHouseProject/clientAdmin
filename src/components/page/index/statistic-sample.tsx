@@ -14,6 +14,7 @@ import { getActiveUserCount } from "@/pages/api/user";
 import { GetServerSideProps } from "next";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Space, Spin } from "antd";
+import { getMeetingCountByDateRange } from "@/pages/api/meeting";
 
 interface IStatisticSampleProps {
   data: IDashboardResponse;
@@ -66,12 +67,21 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
   console.log("activeUserCount: ", activeUserCount);
 
   useEffect(() => {
+    // getMeetingCountByDateRange
+
+    const fetchMeetingCountByDateRange = async () => {
+      const count = await getMeetingCountByDateRange("2024", "6", "2024", "7");
+      console.log("count1123123: ", count);
+      // setActiveUserCount(count); TODO
+    };
+
     const fetchActiveUserCount = async () => {
       const count = await getActiveUserCount();
       setActiveUserCount(count);
     };
 
     fetchActiveUserCount();
+    fetchMeetingCountByDateRange();
   }, []);
 
   return (
@@ -132,7 +142,7 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
               </div>
             </div>
             <div className="p-5 border rounded-lg ">
-              <div>6</div>
+              <div>이 달 모임개설 활성도(이번달 개설건수(사용자별 한번)/전체크루원수)</div>
               <div className="mt-3">
                 <div className="flex items-center mt-3">
                   <div className="text-2xl font-semibold grow">
