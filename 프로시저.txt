@@ -24,75 +24,7 @@ GROUP BY
   u."birthYear",
   u.created_at
 
--- Supabase AI is experimental and may produce incorrect answers
--- Always verify the output before executing
 
--- CREATE
--- OR REPLACE FUNCTION public.get_user_details_and_meeting_counts (account_id TEXT) RETURNS TABLE (
---   KEY TEXT,
---   NAME TEXT,
---   birthYear INT,
---   email TEXT,
---   attendance BIGINT,
---   meetings BIGINT,
---   joinDate TEXT
--- ) AS $$
--- BEGIN
---     RETURN QUERY
---     SELECT
---         u."accountId" AS KEY,
---         u.name AS NAME,
---         u."birthYear"::INT AS birthYear,
---         u.email AS email,
---         COUNT(m._id) AS attendance,
---         COUNT(DISTINCT CASE
---                 WHEN m.founder = TRUE THEN m._id
---             END
---         ) AS meetings,
---         TO_CHAR(u.created_at, 'YYYY-MM-DD') AS joinDate
---     FROM
---         public."user" u
---     LEFT JOIN public.meeting m ON u."accountId" = m."accountId"
---     WHERE u."accountId" = account_id
---     GROUP BY
---         u."accountId",
---         u.name,
---         u."birthYear",
---         u.created_at;
--- END;
--- $$ LANGUAGE plpgsql;
-
-select public.get_user_details_and_meeting_counts('2413826649')
-
-
-
-
-<get_meeting_count_by_month>================================================================
-<월별 모임 개설 건수 파악>
-CALL get_meeting_count_by_month(2023, 1);
-================================================================
-CREATE OR REPLACE PROCEDURE get_meeting_count_by_month(
-    p_year INTEGER,
-    p_month INTEGER
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    RETURN QUERY
-    SELECT
-        EXTRACT(MONTH FROM meeting.meeting_date::TIMESTAMP WITHOUT TIME ZONE) AS month,
-        COUNT(CASE WHEN meeting.founder = TRUE THEN 1 ELSE NULL::INTEGER END) AS founder_count
-    FROM
-        meeting
-    WHERE
-        EXTRACT(YEAR FROM meeting.meeting_date::TIMESTAMP WITHOUT TIME ZONE) = p_year
-        AND EXTRACT(MONTH FROM meeting.meeting_date::TIMESTAMP WITHOUT TIME ZONE) = p_month
-    GROUP BY
-        EXTRACT(MONTH FROM meeting.meeting_date::TIMESTAMP WITHOUT TIME ZONE)
-    ORDER BY
-        EXTRACT(MONTH FROM meeting.meeting_date::TIMESTAMP WITHOUT TIME ZONE);
-END;
-$$;
 
 
 
@@ -100,12 +32,13 @@ $$;
 <월별 모임 개설 건수 파악  날짜 범위에서>
 CALL get_meeting_count_by_date_range(2023, 1, 2024, 9);
 ================================================================
-CREATE OR REPLACE PROCEDURE get_meeting_count_by_date_range(
+CREATE OR REPLACE FUNCTION get_meeting_count_by_date_range(
     p_start_year INTEGER,
     p_start_month INTEGER,
     p_end_year INTEGER,
     p_end_month INTEGER
 )
+RETURNS TABLE(year INTEGER, month INTEGER, founder_count INTEGER)
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -119,20 +52,23 @@ BEGIN
             )))::timestamp AS month_start
     )
     SELECT
-        EXTRACT(YEAR FROM ds.month_start) AS year,
-        EXTRACT(MONTH FROM ds.month_start) AS month,
-        COALESCE(COUNT(m.meeting_date), 0) AS founder_count
+        EXTRACT(YEAR FROM ds.month_start)::INTEGER AS year,
+        EXTRACT(MONTH FROM ds.month_start)::INTEGER AS month,
+        COALESCE(COUNT(m.meeting_date), 0)::INTEGER AS founder_count
     FROM
         date_series ds
         LEFT JOIN meeting m ON EXTRACT(YEAR FROM m.meeting_date::TIMESTAMP WITHOUT TIME ZONE) = EXTRACT(YEAR FROM ds.month_start)
         AND EXTRACT(MONTH FROM m.meeting_date::TIMESTAMP WITHOUT TIME ZONE) = EXTRACT(MONTH FROM ds.month_start)
         AND m.founder = TRUE
+        AND (delete IS NULL OR delete = FALSE)
     GROUP BY
         ds.month_start
     ORDER BY
         ds.month_start;
 END;
 $$;
+
+
 
 
 <get_meeting_count_by_date_range>================================================================
@@ -371,5 +307,132 @@ BEGIN
   ORDER BY
     age,
     month;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+<get_founder_count_by_period>================================================================
+<월별기준 개설자의 수(사람자체의 숫자)>
+CALL get_founder_count_by_period(2023, 1, 2024, 9);
+================================================================
+CREATE
+OR REPLACE FUNCTION get_founder_count_by_period (
+  start_year INTEGER,
+  start_month INTEGER,
+  end_year INTEGER,
+  end_month INTEGER
+) RETURNS TABLE (YEAR INTEGER, MONTH INTEGER, founder_count BIGINT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        EXTRACT(YEAR FROM meeting.meeting_date) AS year,
+        EXTRACT(MONTH FROM meeting.meeting_date) AS month,
+        COUNT(DISTINCT meeting."accountId") AS founder_count
+    FROM
+        public.meeting
+    WHERE
+        EXTRACT(YEAR FROM meeting.meeting_date) * 100 + EXTRACT(MONTH FROM meeting.meeting_date)
+        BETWEEN start_year * 100 + start_month AND end_year * 100 + end_month
+        AND meeting.founder = true
+        AND meeting.delete IS NULL
+    GROUP BY
+        EXTRACT(YEAR FROM meeting.meeting_date),
+        EXTRACT(MONTH FROM meeting.meeting_date);
+END;
+$$ LANGUAGE plpgsql;
+
+
+<get_meeting_counts_by_period>================================================================
+<월별 기간 입력시 주마다(7일단위)의 참여자수 결과>
+CALL get_meeting_counts_by_period(2023, 1, 2024, 9);
+================================================================
+CREATE OR REPLACE FUNCTION get_meeting_counts_by_period(
+    start_year_month INTEGER,
+    end_year_month INTEGER
+)
+RETURNS TABLE (
+    year INTEGER,
+    month INTEGER,
+    period TEXT,
+    founder_count INTEGER,
+    period_start_date DATE
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        EXTRACT(YEAR FROM meeting.meeting_date) AS year,
+        EXTRACT(MONTH FROM meeting.meeting_date) AS month,
+        CASE
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 1 AND 7 THEN '1-7'
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 8 AND 14 THEN '8-14'
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 15 AND 21 THEN '15-21'
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 22 AND 28 THEN '22-28'
+            ELSE '29-month_end'
+        END AS period,
+        COUNT(meeting."accountId") AS founder_count,
+        CASE
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 1 AND 7 THEN DATE_TRUNC('month', meeting.meeting_date) + INTERVAL '0 day'
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 8 AND 14 THEN DATE_TRUNC('month', meeting.meeting_date) + INTERVAL '7 days'
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 15 AND 21 THEN DATE_TRUNC('month', meeting.meeting_date) + INTERVAL '14 days'
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 22 AND 28 THEN DATE_TRUNC('month', meeting.meeting_date) + INTERVAL '21 days'
+            ELSE DATE_TRUNC('month', meeting.meeting_date) + INTERVAL '28 days'
+        END AS period_start_date
+    FROM
+        public.meeting
+    WHERE
+        EXTRACT(YEAR FROM meeting.meeting_date) * 100 + EXTRACT(MONTH FROM meeting.meeting_date)
+        BETWEEN start_year_month AND end_year_month
+        AND meeting.delete IS NULL
+    GROUP BY
+        EXTRACT(YEAR FROM meeting.meeting_date),
+        EXTRACT(MONTH FROM meeting.meeting_date),
+        CASE
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 1 AND 7 THEN '1-7'
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 8 AND 14 THEN '8-14'
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 15 AND 21 THEN '15-21'
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 22 AND 28 THEN '22-28'
+            ELSE '29-month_end'
+        END,
+        CASE
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 1 AND 7 THEN DATE_TRUNC('month', meeting.meeting_date) + INTERVAL '0 day'
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 8 AND 14 THEN DATE_TRUNC('month', meeting.meeting_date) + INTERVAL '7 days'
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 15 AND 21 THEN DATE_TRUNC('month', meeting.meeting_date) + INTERVAL '14 days'
+            WHEN DATE_PART('day', meeting.meeting_date) BETWEEN 22 AND 28 THEN DATE_TRUNC('month', meeting.meeting_date) + INTERVAL '21 days'
+            ELSE DATE_TRUNC('month', meeting.meeting_date) + INTERVAL '28 days'
+        END
+    ORDER BY
+        year, month, period_start_date;
+END;
+$$ LANGUAGE plpgsql;
+
+
+<get_monthly_user_count>================================================================
+<월별 기간 입력시 주마다(7일단위)의 참여자수 결과>
+CALL get_monthly_user_count(2023, 1, 2024, 9);
+================================================================
+CREATE OR REPLACE FUNCTION get_monthly_user_count(start_year INT, start_month INT, end_year INT, end_month INT)
+RETURNS TABLE(start_year INT, start_month INT, total_members INT) AS $$
+BEGIN
+  RETURN QUERY WITH
+    months AS (
+      SELECT
+        generate_series(
+          date concat(start_year, '-', start_month, '-01'),
+          date concat(end_year, '-', end_month, '-01'),
+          interval '1 month'
+        ) AS month_start
+    )
+  SELECT
+    EXTRACT(YEAR FROM month_start) AS start_year,
+    EXTRACT(MONTH FROM month_start) AS start_month,
+    (
+      SELECT COUNT(*)
+      FROM public.user
+      WHERE created_at <= month_start + interval '1 month' - interval '1 day'
+        AND activation = TRUE
+    ) AS total_members
+  FROM months
+  ORDER BY start_year, start_month;
 END;
 $$ LANGUAGE plpgsql;

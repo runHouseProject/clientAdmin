@@ -35,6 +35,8 @@ const renderChangeRate = (value: number) => {
         {value}%
       </span>
     );
+  } else {
+    <span className="flex items-center px-2 py-1 text-sm text-white rounded-full bg-alizarin">{}</span>;
   }
 };
 
@@ -64,6 +66,8 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
   const AttendanceData: ProgressBarData[] = [result];
 
   const [activeUserCount, setActiveUserCount] = useState<number | null>(null);
+  const [meetingCount, setMeetingCount] = useState<number | null>(null);
+  const [diffLastMontMeetingCount, setDiffLastMontMeetingCount] = useState<number | null>(null);
   console.log("activeUserCount: ", activeUserCount);
 
   useEffect(() => {
@@ -72,7 +76,10 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
     const fetchMeetingCountByDateRange = async () => {
       const count = await getMeetingCountByDateRange("2024", "6", "2024", "7");
       console.log("count1123123: ", count);
-      // setActiveUserCount(count); TODO
+      const meetingCount = count?.thisMonthFounderCount ?? 0;
+      const diffLastMontMeetingCount = count?.diffLastMonthRate ?? 0;
+      setMeetingCount(meetingCount);
+      setDiffLastMontMeetingCount(diffLastMontMeetingCount);
     };
 
     const fetchActiveUserCount = async () => {
@@ -97,25 +104,20 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
               <div className="mt-3">
                 <div className="flex items-center mt-3">
                   <div className="text-2xl font-semibold grow">
-                    {activeUserCount !== null ? (
-                      <CountUp end={activeUserCount} separator="," />
-                    ) : (
-                      <Spin indicator={<LoadingOutlined spin />} size="small" />
-                    )}
-                    명
+                    <CountUp end={activeUserCount !== null ? activeUserCount : 0} separator="," />명
                   </div>
                   <div>{renderChangeRate(data.visitor.rate)}</div>
                 </div>
               </div>
             </div>
             <div className="p-5 border rounded-lg ">
-              <div>이 달 모임건수(이달 모인건수/전달 모임건수)</div>
+              <div>이 달 모임건수</div>
               <div className="mt-3">
                 <div className="flex items-center mt-3">
                   <div className="text-2xl font-semibold grow">
-                    <CountUp end={data.visitor.value} separator="," />명
+                    <CountUp end={meetingCount !== null ? meetingCount : 0} separator="," />건
                   </div>
-                  <div>{renderChangeRate(data.visitor.rate)}</div>
+                  <div>{renderChangeRate(diffLastMontMeetingCount !== null ? diffLastMontMeetingCount : 0)}</div>
                 </div>
               </div>
             </div>

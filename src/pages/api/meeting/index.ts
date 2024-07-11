@@ -400,7 +400,7 @@ export async function getMeetingCountByDateRange(
       return null;
     }
 
-    return (secondCount / firstCount) * 100;
+    return (secondCount / firstCount) * 100 - 100;
   }
 
   if (error) {
