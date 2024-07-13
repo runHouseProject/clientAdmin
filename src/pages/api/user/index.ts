@@ -77,22 +77,56 @@ export async function getUserInfoById(accountId: string) {
 }
 
 export async function getActiveUserCount() {
-  const { data, error, count } = await supabase.from("user").select("*", { count: "exact" }).eq("activation", true);
-  console.log("count4444:33 ", count);
-  console.log("data111111: ", data);
+  // const { data, error, count } = await supabase.from("user").select("*", { count: "exact" }).eq("activation", true);
+  // console.log("count4444:33 ", count);
+  // console.log("data111111: ", data);
+  const { data, error } = await supabase.rpc("get_monthly_user_count_by_month", {
+    start_year: 2024,
+    start_month: 6,
+    end_year: 2024,
+    end_month: 8,
+  });
+  // data;
+  console.log("error: ", error);
+  console.log("data: ", data);
 
+  // start_year INT, start_month INT, end_year INT, end_year INT
   if (error) {
     console.error("Error fetching count:", error);
     return null;
   } else {
-    console.log("Count of rows where activation is true:", count);
+    // console.log("Count of rows where activation is true:", count);
   }
 
-  if (data.length === 0) {
-    return null;
+  if (data.length !== 0) {
+    const result = calculateUserAccCount(data);
+    console.log("result: ", result);
+    return result;
   }
 
-  const result: number | null = count;
+  // const result: number | null = count;
 
-  return count;
+  return null;
+
+  function calculateUserAccCount(data: any) {
+    if (data.length === 0) {
+      return {
+        thisMonthUserAccCount: 0,
+        diffUserAccCountRatio: 0,
+      };
+    }
+
+    const lastEntry = data[data.length - 1];
+    const secondLastEntry = data.length > 1 ? data[data.length - 2] : { total_members: "0" };
+
+    const thisMonthUserAccCount = parseInt(lastEntry.total_members, 10);
+    const previousMonthUserAccCount = parseInt(secondLastEntry.total_members, 10);
+
+    const diffUserAccCountRatio = ((thisMonthUserAccCount / previousMonthUserAccCount) * 100 - 100).toFixed(2);
+
+    return {
+      thisMonthUserAccCount,
+      diffUserAccCountRatio: isNaN(parseFloat(diffUserAccCountRatio)) ? 0 : parseFloat(diffUserAccCountRatio),
+    };
+  }
 }

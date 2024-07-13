@@ -62,29 +62,29 @@ export const getServerSideProps: GetServerSideProps = async () => {
 const StatisticSample = ({ data }: IStatisticSampleProps) => {
   console.log("data: ", data);
   const result = getCurrentMonthInfoWithPercent();
-
   const AttendanceData: ProgressBarData[] = [result];
 
+  //총 크루원수
   const [activeUserCount, setActiveUserCount] = useState<number | null>(null);
-  const [meetingCount, setMeetingCount] = useState<number | null>(null);
+  const [diffUserAccCountRatio, setDiffUserAccCountRatio] = useState<number | null>(null);
+
+  //이달 모임건수
   const [diffLastMontMeetingCount, setDiffLastMontMeetingCount] = useState<number | null>(null);
-  console.log("activeUserCount: ", activeUserCount);
+  const [meetingCount, setMeetingCount] = useState<number | null>(null);
 
   useEffect(() => {
-    // getMeetingCountByDateRange
-
-    const fetchMeetingCountByDateRange = async () => {
-      const count = await getMeetingCountByDateRange("2024", "6", "2024", "7");
-      console.log("count1123123: ", count);
-      const meetingCount = count?.thisMonthFounderCount ?? 0;
-      const diffLastMontMeetingCount = count?.diffLastMonthRate ?? 0;
-      setMeetingCount(meetingCount);
-      setDiffLastMontMeetingCount(diffLastMontMeetingCount);
-    };
-
+    //총 크루원수
     const fetchActiveUserCount = async () => {
       const count = await getActiveUserCount();
-      setActiveUserCount(count);
+      if (count) setActiveUserCount(count?.thisMonthUserAccCount);
+      if (count) setDiffUserAccCountRatio(count?.diffUserAccCountRatio);
+    };
+
+    //이달 모임건수
+    const fetchMeetingCountByDateRange = async () => {
+      const count = await getMeetingCountByDateRange("2024", "6", "2024", "7");
+      if (count) setMeetingCount(count?.thisMonthFounderCount);
+      if (count) setDiffLastMontMeetingCount(count?.diffLastMonthRate);
     };
 
     fetchActiveUserCount();
@@ -106,7 +106,7 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
                   <div className="text-2xl font-semibold grow">
                     <CountUp end={activeUserCount !== null ? activeUserCount : 0} separator="," />명
                   </div>
-                  <div>{renderChangeRate(data.visitor.rate)}</div>
+                  <div>{renderChangeRate(diffUserAccCountRatio !== null ? diffUserAccCountRatio : 0)}</div>
                 </div>
               </div>
             </div>

@@ -343,7 +343,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-<get_meeting_counts_by_period>================================================================
+<get_meeting_counts_by_week>================================================================
 <월별 기간 입력시 주마다(7일단위)의 참여자수 결과>
 CALL get_meeting_counts_by_period(2023, 1, 2024, 9);
 ================================================================
@@ -407,32 +407,42 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-<get_monthly_user_count>================================================================
-<월별 기간 입력시 주마다(7일단위)의 참여자수 결과>
-CALL get_monthly_user_count(2023, 1, 2024, 9);
+<get_monthly_user_count_by_month>================================================================
+<월별 기간 입력시 월별 누적 유적 수 결과>
+CALL get_monthly_user_count_by_month(2023, 1, 2024, 9);
 ================================================================
-CREATE OR REPLACE FUNCTION get_monthly_user_count(start_year INT, start_month INT, end_year INT, end_month INT)
-RETURNS TABLE(start_year INT, start_month INT, total_members INT) AS $$
+CREATE OR REPLACE FUNCTION get_monthly_user_count_by_month(start_year INT, start_month INT, end_year INT, end_month INT)
+RETURNS TABLE(year STRING, month STRING, total_members INT) AS $$
 BEGIN
-  RETURN QUERY WITH
-    months AS (
+  RETURN QUERY WITH user_counts AS (
       SELECT
-        generate_series(
-          date concat(start_year, '-', start_month, '-01'),
-          date concat(end_year, '-', end_month, '-01'),
-          interval '1 month'
-        ) AS month_start
-    )
+          EXTRACT(YEAR FROM created_at) AS year,
+          EXTRACT(MONTH FROM created_at) AS month,
+          COUNT(*) AS monthly_count
+      FROM
+          public."user"
+      GROUP BY
+          EXTRACT(YEAR FROM created_at),
+          EXTRACT(MONTH FROM created_at)
+  ),
+  cumulative_counts AS (
+      SELECT
+          year,
+          month,
+          SUM(monthly_count) OVER (ORDER BY year, month ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS total_members
+      FROM
+          user_counts
+  )
   SELECT
-    EXTRACT(YEAR FROM month_start) AS start_year,
-    EXTRACT(MONTH FROM month_start) AS start_month,
-    (
-      SELECT COUNT(*)
-      FROM public.user
-      WHERE created_at <= month_start + interval '1 month' - interval '1 day'
-        AND activation = TRUE
-    ) AS total_members
-  FROM months
-  ORDER BY start_year, start_month;
+      year,
+      month,
+      total_members
+  FROM
+      cumulative_counts
+  WHERE
+      (year * 100 + month) BETWEEN (start_year * 100 + start_month) AND (end_year * 100 + end_month)
+  ORDER BY
+      year,
+      month;
 END;
 $$ LANGUAGE plpgsql;
