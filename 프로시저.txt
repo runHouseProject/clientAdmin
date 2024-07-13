@@ -412,12 +412,12 @@ $$ LANGUAGE plpgsql;
 CALL get_monthly_user_count_by_month(2023, 1, 2024, 9);
 ================================================================
 CREATE OR REPLACE FUNCTION get_monthly_user_count_by_month(start_year INT, start_month INT, end_year INT, end_month INT)
-RETURNS TABLE(year STRING, month STRING, total_members INT) AS $$
+RETURNS TABLE(year INT, month INT, total_members INT) AS $$
 BEGIN
   RETURN QUERY WITH user_counts AS (
       SELECT
-          EXTRACT(YEAR FROM created_at) AS year,
-          EXTRACT(MONTH FROM created_at) AS month,
+          EXTRACT(YEAR FROM created_at) AS user_year,
+          EXTRACT(MONTH FROM created_at) AS user_month,
           COUNT(*) AS monthly_count
       FROM
           public."user"
@@ -427,22 +427,23 @@ BEGIN
   ),
   cumulative_counts AS (
       SELECT
-          year,
-          month,
-          SUM(monthly_count) OVER (ORDER BY year, month ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS total_members
+          user_year,
+          user_month,
+          SUM(monthly_count) OVER (ORDER BY user_year, user_month ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_total_members
       FROM
           user_counts
   )
   SELECT
-      year,
-      month,
-      total_members
+      user_year::INT AS year,
+      user_month::INT AS month,
+      cumulative_total_members::INT AS total_members
   FROM
       cumulative_counts
   WHERE
-      (year * 100 + month) BETWEEN (start_year * 100 + start_month) AND (end_year * 100 + end_month)
+      (user_year * 100 + user_month) BETWEEN (start_year * 100 + start_month) AND (end_year * 100 + end_month)
   ORDER BY
-      year,
-      month;
+      user_year,
+      user_month;
 END;
 $$ LANGUAGE plpgsql;
+
