@@ -488,3 +488,189 @@ export async function getParticipateUserCountByDateRange(
     diffLastMonthRate,
   };
 }
+
+//============================================================================
+interface ParticipateDistinctUserCountDataItem {
+  year: number;
+  month: number;
+  distinct_account_count: number;
+}
+
+export async function getDistinctUserForPeriodByMonth(
+  start_year: string,
+  start_month: string,
+  end_year: string,
+  end_month: string
+) {
+  const { data, error } = await supabase.rpc("get_distinct_user_for_period_by_month", {
+    start_year: parseInt(start_year),
+    start_month: parseInt(start_month),
+    end_year: parseInt(end_year),
+    end_month: parseInt(end_month),
+  });
+
+  console.log("data get_meeting_count_by_date_range: ", data);
+  console.log("data get_meeting_count_by_date_range error: ", error);
+
+  function getThisMonthCount(data: ParticipateDistinctUserCountDataItem[]) {
+    if (!data || data.length === 0) {
+      return null;
+    }
+    const lastElement = data[data.length - 1];
+    return lastElement.distinct_account_count;
+  }
+
+  // data 배열의 첫 번째와 두 번째 객체에서 founder_count 값을 가져와 변화율을 계산해 반환하는 함수
+  function getDiffLastMonth(data: ParticipateDistinctUserCountDataItem[]) {
+    if (!data || data.length < 2) {
+      return null;
+    }
+
+    const firstElement = data[0];
+    const secondElement = data[1];
+
+    const firstCount = firstElement.distinct_account_count;
+    const secondCount = secondElement.distinct_account_count;
+
+    if (firstCount === 0 || secondCount === 0) {
+      return null;
+    }
+
+    const result = (secondCount / firstCount) * 100 - 100;
+    return parseInt(result.toFixed(0));
+  }
+
+  if (error) {
+    console.error("Error executing query:", error);
+    return null;
+  }
+
+  if (data.length === 0) {
+    return null;
+  }
+
+  const thisMonthParticipateDistinctUserCount = getThisMonthCount(data);
+  const diffLastMonthRate = getDiffLastMonth(data);
+
+  return {
+    thisMonthParticipateDistinctUserCount,
+    diffLastMonthRate,
+  };
+}
+
+//============================================================================
+interface ParticipateDistinctFounderCountDataItem {
+  year: number;
+  month: number;
+  founder_count: number;
+}
+
+export async function getDistinctFounderCountByPeriod(
+  start_year: string,
+  start_month: string,
+  end_year: string,
+  end_month: string
+) {
+  const { data, error } = await supabase.rpc("get_distinct_founder_count_by_period", {
+    start_year: parseInt(start_year),
+    start_month: parseInt(start_month),
+    end_year: parseInt(end_year),
+    end_month: parseInt(end_month),
+  });
+
+  console.log("data get_meeting_count_by_date_range: ", data);
+  console.log("data get_meeting_count_by_date_range error: ", error);
+
+  function getThisMonthCount(data: ParticipateDistinctFounderCountDataItem[]) {
+    if (!data || data.length === 0) {
+      return null;
+    }
+    const lastElement = data[data.length - 1];
+    return lastElement.founder_count;
+  }
+
+  // data 배열의 첫 번째와 두 번째 객체에서 founder_count 값을 가져와 변화율을 계산해 반환하는 함수
+  function getDiffLastMonth(data: ParticipateDistinctFounderCountDataItem[]) {
+    if (!data || data.length < 2) {
+      return null;
+    }
+
+    const firstElement = data[0];
+    const secondElement = data[1];
+
+    const firstCount = firstElement.founder_count;
+    const secondCount = secondElement.founder_count;
+
+    if (firstCount === 0 || secondCount === 0) {
+      return null;
+    }
+
+    const result = (secondCount / firstCount) * 100 - 100;
+    return parseInt(result.toFixed(0));
+  }
+
+  if (error) {
+    console.error("Error executing query:", error);
+    return null;
+  }
+
+  if (data.length === 0) {
+    return null;
+  }
+
+  const thisMonthDistinctFounderCount = getThisMonthCount(data);
+  const diffLastMonthRate = getDiffLastMonth(data);
+
+  return {
+    thisMonthDistinctFounderCount,
+    diffLastMonthRate,
+  };
+}
+
+//============================================================================
+interface ChartComponentProps {
+  data: Array<{ name: string; dataCount: number }>;
+}
+
+export async function getParticipationTrendData(
+  start_year: string,
+  start_month: string,
+  end_year: string,
+  end_month: string
+): Promise<ChartComponentProps["data"]> {
+  const { data, error } = await supabase.rpc("get_participation_user_counts_week_detail_by_period", {
+    start_year: parseInt(start_year),
+    start_month: parseInt(start_month),
+    end_year: parseInt(end_year),
+    end_month: parseInt(end_month),
+  });
+
+  if (error) {
+    console.error("Error executing query:", error);
+    return [{ name: "2406", dataCount: 29 }];
+  }
+
+  if (data.length === 0) {
+    return [{ name: "2406", dataCount: 29 }];
+  }
+
+  const transformData = (
+    inputData: Array<{
+      year: number;
+      month: number;
+      period: string;
+      participation_user_count: number;
+      period_start_date: string;
+    }>
+  ): ChartComponentProps["data"] => {
+    return inputData.map((item) => ({
+      name: `${String(item.period_start_date.slice(5, 10))}`,
+      dataCount: item.participation_user_count,
+    }));
+  };
+
+  const chartData = transformData(data);
+  console.log("chartData1111: ", chartData);
+
+  return chartData;
+}

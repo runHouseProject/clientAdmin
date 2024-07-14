@@ -14,7 +14,27 @@ import { getActiveUserCount } from "@/pages/api/user";
 import { GetServerSideProps } from "next";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Space, Spin } from "antd";
-import { getMeetingCountByDateRange, getParticipateUserCountByDateRange } from "@/pages/api/meeting";
+import {
+  getDistinctFounderCountByPeriod,
+  getDistinctUserForPeriodByMonth,
+  getMeetingCountByDateRange,
+  getParticipateUserCountByDateRange,
+  getParticipationTrendData,
+} from "@/pages/api/meeting";
+
+interface ChartComponentProps {
+  data: Array<{ name: string; dataCount: number }>;
+}
+
+const ChartData = [
+  { name: "Mon", uv: 25, dataCount: 2400 },
+  { name: "Tue", uv: 10, dataCount: 2210 },
+  { name: "Wed", uv: 28, dataCount: 2290 },
+  { name: "Thu", uv: 44, dataCount: 2000 },
+  { name: "Fri", uv: 54, dataCount: 2181 },
+  { name: "Sat", uv: 50, dataCount: 2500 },
+  { name: "Sun", uv: 32, dataCount: 2500 },
+];
 
 interface IStatisticSampleProps {
   data: IDashboardResponse;
@@ -76,6 +96,17 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
   const [participateUserCount, setParticipateUserCount] = useState<number | null>(null);
   const [diffLastParticipateUserCount, setDiffLastParticipateUserCount] = useState<number | null>(null);
 
+  //이달 참여크루원
+  const [distinctParticipateUserCount, setDistinctParticipateUserCount] = useState<number | null>(null);
+  const [diffLastDistinctParticipateUserCount, setDiffLastDistinctParticipateUserCount] = useState<number | null>(null);
+
+  //이 달 모임 개설 크루원
+  const [distinctFounderCount, setDistinctFounderCount] = useState<number | null>(null);
+  const [diffLastDistinctFounderCount, setDiffLastDistinctFounderCount] = useState<number | null>(null);
+
+  //참여자수 추이(주마다의 참여자수)의 추이
+  const [participationTrendData, setParticipationTrendData] = useState<ChartComponentProps["data"] | null>(null);
+
   useEffect(() => {
     //총 크루원수
     const fetchActiveUserCount = async () => {
@@ -98,6 +129,30 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
       if (count) setDiffLastParticipateUserCount(count?.diffLastMonthRate);
     };
 
+    //이 달 참여크루원
+    const fetchParticipateDistinctUserCountByDateRange = async () => {
+      const count = await getDistinctUserForPeriodByMonth("2024", "6", "2024", "7");
+      if (count) setDistinctParticipateUserCount(count?.thisMonthParticipateDistinctUserCount);
+      if (count) setDiffLastDistinctParticipateUserCount(count?.diffLastMonthRate);
+    };
+
+    //이 달 모임 개설 크루원
+    const fetchDistinctFounderCountByPeriod = async () => {
+      const count = await getDistinctFounderCountByPeriod("2024", "6", "2024", "7");
+      if (count) setDistinctFounderCount(count?.thisMonthDistinctFounderCount);
+      if (count) setDiffLastDistinctFounderCount(count?.diffLastMonthRate);
+    };
+
+    //참여자수 추이(주마다의 참여자수)의 추이
+    const fetchParticipationTrendData = async () => {
+      const count = await getParticipationTrendData("2024", "6", "2024", "7");
+      console.log("count: ", count);
+      if (count) setParticipationTrendData(count);
+    };
+
+    fetchParticipationTrendData();
+    fetchDistinctFounderCountByPeriod();
+    fetchParticipateDistinctUserCountByDateRange();
     fetchActiveUserCount();
     fetchParticipateUserCountByDateRange();
     fetchMeetingCountByDateRange();
@@ -112,7 +167,7 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
               <AttendanceProgressComponent title="이번 달 진행율" data={AttendanceData} />
             </div>
             <div className="p-5 border rounded-lg ">
-              <div>총크루원</div>
+              <div>총 크루원</div>
               <div className="mt-3">
                 <div className="flex items-center mt-3">
                   <div className="text-2xl font-semibold grow">
@@ -123,7 +178,7 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
               </div>
             </div>
             <div className="p-5 border rounded-lg ">
-              <div>이 달 모임건수</div>
+              <div>이 달 모임 수(정기런 제외)</div>
               <div className="mt-3">
                 <div className="flex items-center mt-3">
                   <div className="text-2xl font-semibold grow">
@@ -134,7 +189,7 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
               </div>
             </div>
             <div className="p-5 border rounded-lg ">
-              <div>이 달 참여자수</div>
+              <div>이 달 참여 수</div>
               <div className="mt-3">
                 <div className="flex items-center mt-3">
                   <div className="text-2xl font-semibold grow">
@@ -147,25 +202,29 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
               </div>
             </div>
             <div className="p-5 border rounded-lg ">
-              <div>이 달 참여 활성도(이번달 참여자수(단한번)/전체크루원수)</div>
-              <div className="mt-3">
-                <div className="flex items-center mt-3">
-                  <div className="text-2xl font-semibold grow">
-                    <CountUp end={data.visitor.value} separator="," />명
-                  </div>
-                  <div>{renderChangeRate(data.visitor.rate)}</div>
+              <div>이 달 참여 크루원</div>
+              <div className="flex items-center mt-3">
+                <div className="text-2xl font-semibold grow">
+                  <CountUp
+                    end={distinctParticipateUserCount !== null ? distinctParticipateUserCount : 0}
+                    separator=","
+                  />
+                  명
+                </div>
+                <div>
+                  {renderChangeRate(
+                    diffLastDistinctParticipateUserCount !== null ? diffLastDistinctParticipateUserCount : 0
+                  )}
                 </div>
               </div>
             </div>
             <div className="p-5 border rounded-lg ">
-              <div>이 달 모임개설 활성도(이번달 개설건수(사용자별 한번)/전체크루원수)</div>
-              <div className="mt-3">
-                <div className="flex items-center mt-3">
-                  <div className="text-2xl font-semibold grow">
-                    <CountUp end={data.visitor.value} separator="," />명
-                  </div>
-                  <div>{renderChangeRate(data.visitor.rate)}</div>
+              <div>이 달 모임개설 크루원</div>
+              <div className="flex items-center mt-3">
+                <div className="text-2xl font-semibold grow">
+                  <CountUp end={distinctFounderCount !== null ? distinctFounderCount : 0} separator="," />명
                 </div>
+                <div>{renderChangeRate(diffLastDistinctFounderCount !== null ? diffLastDistinctFounderCount : 0)}</div>
               </div>
             </div>
           </div>
@@ -199,16 +258,13 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
             </div>
             <div className="h-full space-x-4 flex-2">
               <div className="h-full p-5 border rounded-lg ">
-                <div>참여자수 추이(주마다의 참여자수)의 추이 </div>
-                {/* <div className="mt-3">
-                  <div className="text-2xl font-semibold grow">
-                    <CountUp end={data.visitor.value} separator="," />명
-                  </div>
-                  <div>{renderChangeRate(data.visitor.rate)}</div>
-                </div> */}
+                <div>참여자 수(주 단위)</div>
                 <div>
-                  {/* LineChartComponent, TinyAreaChartComponent, BasicLineChart */}
-                  <LineChartComponent />
+                  {participationTrendData ? (
+                    <LineChartComponent data={participationTrendData} />
+                  ) : (
+                    <div>Loading...</div>
+                  )}
                 </div>
               </div>
             </div>
