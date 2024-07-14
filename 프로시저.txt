@@ -107,8 +107,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-<get_meeting_count_by_date_range>================================================================
-<월별 모임 수>
+<get_meeting_count_for_period>================================================================
+<월별 모임 참여자 수 (중복참여자 상관없이) 단, 삭제된건 제외>
 CALL get_meeting_count_for_period(2023, 1, 2024, 9);
 ================================================================
 CREATE OR REPLACE FUNCTION get_meeting_count_for_period(
@@ -125,9 +125,9 @@ RETURNS TABLE (
 BEGIN
   RETURN QUERY
   SELECT
-    EXTRACT(YEAR FROM meeting_date) AS YEAR,
-    EXTRACT(MONTH FROM meeting_date) AS MONTH,
-    COUNT(*) AS meeting_count
+    EXTRACT(YEAR FROM meeting_date)::INT AS YEAR,
+    EXTRACT(MONTH FROM meeting_date)::INT AS MONTH,
+    COUNT(*)::INT AS meeting_count
   FROM
     public.meeting
   WHERE
@@ -135,16 +135,17 @@ BEGIN
     AND meeting_date < MAKE_TIMESTAMP(end_year, end_month, 1, 0, 0, 0) + INTERVAL '1 MONTH'
     AND (delete IS NULL OR delete = FALSE)
   GROUP BY
-    EXTRACT(YEAR FROM meeting_date),
-    EXTRACT(MONTH FROM meeting_date)
+    EXTRACT(YEAR FROM meeting_date)::INT,
+    EXTRACT(MONTH FROM meeting_date)::INT
   ORDER BY
     YEAR DESC,
-    MONTH DESC;
+    MONTH ASC;
 END;
 $$ LANGUAGE plpgsql;
 
+
 <get_distinct_user_for_period_by_month>================================================================
-<월별 참여한번이라도 한 인원 파악>
+<월별 참여 한번이라도 한 인원 파악>
 CALL get_meeting_count_for_period(2023, 1, 2024, 9);
 ================================================================
 CREATE OR REPLACE FUNCTION get_distinct_user_for_period_by_month(

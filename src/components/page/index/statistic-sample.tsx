@@ -14,7 +14,7 @@ import { getActiveUserCount } from "@/pages/api/user";
 import { GetServerSideProps } from "next";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Space, Spin } from "antd";
-import { getMeetingCountByDateRange } from "@/pages/api/meeting";
+import { getMeetingCountByDateRange, getParticipateUserCountByDateRange } from "@/pages/api/meeting";
 
 interface IStatisticSampleProps {
   data: IDashboardResponse;
@@ -69,8 +69,12 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
   const [diffUserAccCountRatio, setDiffUserAccCountRatio] = useState<number | null>(null);
 
   //이달 모임건수
-  const [diffLastMontMeetingCount, setDiffLastMontMeetingCount] = useState<number | null>(null);
   const [meetingCount, setMeetingCount] = useState<number | null>(null);
+  const [diffLastMontMeetingCount, setDiffLastMontMeetingCount] = useState<number | null>(null);
+
+  //이달 참여자 수
+  const [participateUserCount, setParticipateUserCount] = useState<number | null>(null);
+  const [diffLastParticipateUserCount, setDiffLastParticipateUserCount] = useState<number | null>(null);
 
   useEffect(() => {
     //총 크루원수
@@ -80,14 +84,22 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
       if (count) setDiffUserAccCountRatio(count?.diffUserAccCountRatio);
     };
 
-    //이달 모임건수
+    //이 달 모임건수
     const fetchMeetingCountByDateRange = async () => {
       const count = await getMeetingCountByDateRange("2024", "6", "2024", "7");
       if (count) setMeetingCount(count?.thisMonthFounderCount);
       if (count) setDiffLastMontMeetingCount(count?.diffLastMonthRate);
     };
 
+    //이 달 모임건수
+    const fetchParticipateUserCountByDateRange = async () => {
+      const count = await getParticipateUserCountByDateRange("2024", "6", "2024", "7");
+      if (count) setParticipateUserCount(count?.thisMonthParticipateUserCount);
+      if (count) setDiffLastParticipateUserCount(count?.diffLastMonthRate);
+    };
+
     fetchActiveUserCount();
+    fetchParticipateUserCountByDateRange();
     fetchMeetingCountByDateRange();
   }, []);
 
@@ -122,13 +134,15 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
               </div>
             </div>
             <div className="p-5 border rounded-lg ">
-              <div>이 달 참여자수(이달 참여자수/전달 모임건수)</div>
+              <div>이 달 참여자수</div>
               <div className="mt-3">
                 <div className="flex items-center mt-3">
                   <div className="text-2xl font-semibold grow">
-                    <CountUp end={data.visitor.value} separator="," />명
+                    <CountUp end={participateUserCount !== null ? participateUserCount : 0} separator="," />건
                   </div>
-                  <div>{renderChangeRate(data.visitor.rate)}</div>
+                  <div>
+                    {renderChangeRate(diffLastParticipateUserCount !== null ? diffLastParticipateUserCount : 0)}
+                  </div>
                 </div>
               </div>
             </div>
