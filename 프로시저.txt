@@ -220,7 +220,7 @@ $$ LANGUAGE plpgsql;
 
 <get_location_meeting_percentage_for_period>================================================================
 <월별기준 장소별 참여 횟수 및 트랜드>
-CALL get_meeting_count_for_period(2023, 1, 2024, 9);
+select * from  get_location_meeting_percentage_for_period(2023, 1, 2024, 9);
 ================================================================
 CREATE OR REPLACE FUNCTION get_location_meeting_percentage_for_period(
   start_year INT, 
@@ -241,8 +241,8 @@ BEGIN
     monthly_meeting_counts AS (
       SELECT
         l.name AS location_name,
-        EXTRACT(MONTH FROM m.meeting_date) AS month,
-        COUNT(*) AS meeting_count
+        EXTRACT(MONTH FROM m.meeting_date)::INT AS month,
+        COUNT(*)::INT AS meeting_count
       FROM
         public.meeting m
         INNER JOIN public.location l ON m.location = l.code
@@ -256,8 +256,8 @@ BEGIN
     ),
     total_meeting_counts AS (
       SELECT
-        EXTRACT(MONTH FROM meeting_date) AS month,
-        COUNT(*) AS total_meeting_count
+        EXTRACT(MONTH FROM meeting_date)::INT AS month,
+        COUNT(*)::INT AS total_meeting_count
       FROM
         public.meeting
       WHERE
