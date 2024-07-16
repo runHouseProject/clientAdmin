@@ -6,25 +6,29 @@ export interface ProgressBarData {
   label: string;
   percent: number;
 }
-
 interface AttendanceProgressProps {
-  title?: string;
-  data: ProgressBarData[];
+  title?: string; // title을 선택적(optional) 속성으로 설정합니다.
+  data: Array<{ label: string; percent: number }> | null; // data를 nullable로 설정합니다.
 }
 
-const AttendanceProgressComponent: React.FC<AttendanceProgressProps> = ({ title = "장소별 출석률", data }) => {
+const AttendanceProgressComponent: React.FC<AttendanceProgressProps> = ({ title, data }) => {
   return (
     <>
-      <div className="mb-4 text-2xl font-semibold grow">
-        <h1>{title}</h1>
-      </div>
-
+      {title && (
+        <div className="mb-4 text-2xl font-semibold grow">
+          <h1>{title}</h1>
+        </div>
+      )}
       <div className="flex-col font-semibold text-1xl grow">
-        {data.map((item) => (
-          <div key={item.label} className="progress-bar-container">
-            <ProgressBar label={item.label} percent={item.percent} status="active" strokeWidth={12} />
-          </div>
-        ))}
+        {data ? (
+          data.map((item) => (
+            <div key={item.label} className="progress-bar-container">
+              <ProgressBar label={item.label} percent={item.percent} status="active" strokeWidth={12} />
+            </div>
+          ))
+        ) : (
+          <div className="text-center text-gray-500">데이터가 없음</div>
+        )}
       </div>
     </>
   );

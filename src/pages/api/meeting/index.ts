@@ -674,3 +674,45 @@ export async function getParticipationTrendData(
 
   return chartData;
 }
+
+//============================================================================
+interface ChartComponentPropstt {
+  location_name: string;
+  month: number;
+  meeting_count: number;
+  total_meeting_count: number;
+  percentage: number;
+}
+
+export async function getParticipationRationByLocation(
+  start_year: string,
+  start_month: string,
+  end_year: string,
+  end_month: string
+) {
+  const { data, error } = await supabase.rpc("get_location_meeting_percentage_for_period", {
+    start_year: parseInt(start_year),
+    start_month: parseInt(start_month),
+    end_year: parseInt(end_year),
+    end_month: parseInt(end_month),
+  });
+
+  if (error) {
+    console.error("Error executing query:", error);
+    return null;
+  }
+
+  if (data.length === 0) {
+    return null;
+  }
+
+  const transformData = (data: ChartComponentPropstt[]) => {
+    return data.map((item) => ({
+      label: item.location_name,
+      percent: item.percentage,
+    }));
+  };
+
+  const processBarData = transformData(data);
+  return processBarData;
+}
