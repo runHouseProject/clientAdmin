@@ -461,3 +461,43 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+
+
+<get_inactive_users>================================================================
+<미참여 유저및 참역일 이 오래되신분>
+CALL get_inactive_users(2023, 1, 2024, 9);
+================================================================
+CREATE OR REPLACE FUNCTION get_inactive_users()
+RETURNS TABLE (
+  name TEXT,
+  birthYear TEXT,
+  lastMeeting TEXT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    subquery.name,
+    subquery."birthYear",
+    COALESCE(subquery.lastMeeting::text, '미참여') AS lastMeeting
+  FROM (
+    SELECT
+      u.name,
+      u."birthYear",
+      MAX(m."meeting_date") AS lastMeeting
+    FROM
+      public."user" u
+      LEFT JOIN public.meeting m ON u."accountId" = m."accountId"
+    GROUP BY
+      u.name,
+      u."birthYear"
+  ) AS subquery
+  ORDER BY
+    lastMeeting ASC;
+END;
+$$;
+
+
+select * from get_inactive_users();
