@@ -716,3 +716,79 @@ export async function getParticipationRationByLocation(
   const processBarData = transformData(data);
   return processBarData;
 }
+
+interface ChartComponentPropstt {
+  location_name: string;
+  month: number;
+  meeting_count: number;
+  total_meeting_count: number;
+  percentage: number;
+}
+
+//============================================================================
+
+export async function getLongTermInactiveUsers() {
+  let { data: user } = await supabase
+    .from("user")
+    .select(
+      `
+  name,
+  activation,
+  meeting (
+    accountId,
+    meeting_date
+  )
+`
+    )
+    .eq("activation", true)
+    .gte("meeting.meeting_date", "2024-04-01")
+    .lte("meeting.meeting_date", "2024-08-01");
+
+  console.log("user: ", user);
+  // console.log("error22: ", error22);
+
+  const { data, error } = await supabase.rpc("get_inactive_users");
+  console.log("error: ", error);
+  console.log("data555555: ", data);
+
+  if (error) {
+    console.error("Error fetching data: ", error.message);
+    throw new Error(error.message);
+  }
+
+  interface User {
+    name: string;
+    birthyear: string;
+    lastmeeting: string;
+  }
+
+  interface TableListData {
+    no: number;
+    name: string;
+    lastmeeting: string;
+  }
+
+  function getOldestMeetingUsers(data: User[], topN: number): TableListData[] {
+    // "미참여"를 제외한 데이터만 사용
+    const filteredData = data.filter((user) => user.lastmeeting !== "미참여");
+
+    // 날짜를 기준으로 정렬
+    const sortedData = filteredData.sort((a, b) => {
+      return new Date(a.lastmeeting).getTime() - new Date(b.lastmeeting).getTime();
+    });
+
+    // 상위 topN명만 선택
+    const topUsers = sortedData.slice(0, topN);
+
+    // 결과 생성
+    const result = topUsers.map((user, index) => ({
+      no: index + 1,
+      name: `${user.name} (${user.birthyear})`,
+      lastmeeting: user.lastmeeting,
+    }));
+
+    return result;
+  }
+
+  return getOldestMeetingUsers(data, 5);
+}

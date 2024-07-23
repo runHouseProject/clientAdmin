@@ -5,7 +5,7 @@ import CountUp from "react-countup";
 export interface TableListData {
   no: number;
   name: string;
-  count: number;
+  lastmeeting: string;
 }
 
 interface TableListComponentProps {
@@ -25,9 +25,7 @@ const UserCountComponent: React.FC<TableListComponentProps> = ({ title = "출석
             <div key={item.no} className="grid grid-cols-12 gap-2 py-2 text-left row">
               <div className="col-span-2 pl-3">{index + 1}</div>
               <div className="col-span-7 pl-3">{item.name}</div>
-              <div className="col-span-3 pl-3">
-                <CountUp end={item.count} separator="," />회
-              </div>
+              <div className="col-span-3 pl-3">{item.lastmeeting}</div>
 
               {index < data.length - 1 && <Divider className="col-span-12 my-1" />}
             </div>

@@ -130,3 +130,41 @@ export async function getActiveUserCount() {
     };
   }
 }
+
+interface User {
+  birthYear: string;
+}
+
+interface GroupedData {
+  name: string;
+  value: number;
+}
+
+export async function getUserCountByAge(): Promise<GroupedData[]> {
+  const { data, error } = await supabase.from("user").select("birthYear").is("activation", true);
+
+  if (error) {
+    console.error("Error fetching data: ", error.message);
+    throw new Error(error.message);
+  }
+
+  const groupByBirthYearRange = (data: User[]): Record<string, number> => {
+    return data.reduce((acc: Record<string, number>, curr: User) => {
+      const birthYear = parseInt(curr.birthYear);
+      const rangeStart = Math.floor(birthYear / 5) * 5;
+      const rangeEnd = rangeStart + 4;
+
+      // Add leading zero for ranges less than 10
+      const range = rangeStart < 20 ? `0${rangeStart}-0${rangeEnd}` : `${rangeStart}-${rangeEnd}`;
+
+      acc[range] = (acc[range] || 0) + 1;
+      return acc;
+    }, {});
+  };
+
+  const groupedData = groupByBirthYearRange(data || []);
+  const result: GroupedData[] = Object.entries(groupedData).map(([name, value]) => ({ name, value }));
+
+  console.log(result);
+  return result;
+}

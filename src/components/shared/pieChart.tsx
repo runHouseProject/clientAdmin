@@ -43,7 +43,11 @@ const DonutPieChart: React.FC = () => (
   </ResponsiveContainer>
 );
 
-const CustomLabelPieChart: React.FC = () => (
+interface UserCountByuAgeProps {
+  data: Array<{ name: string; value: number }>;
+}
+
+const CustomLabelPieChart: React.FC<UserCountByuAgeProps> = ({ data }) => (
   <ResponsiveContainer width="100%" height={150}>
     <PieChart>
       <Pie
@@ -61,7 +65,7 @@ const CustomLabelPieChart: React.FC = () => (
           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
         ))}
       </Pie>
-      {/* <Tooltip /> */}
+      <Tooltip />
       <Legend />
     </PieChart>
   </ResponsiveContainer>

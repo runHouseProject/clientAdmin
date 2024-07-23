@@ -2,29 +2,30 @@ import { IDashboardResponse } from "@/client/sample/dashboard";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-import CountUp from "react-countup";
-import { LineChartComponent, TinyAreaChartComponent, BasicLineChart } from "@/components/shared/chart";
-import { BasicBarChart, MultiBarChart, StackedBarChart } from "@/components/shared/barChart";
-import { BasicPieChart, DonutPieChart, CustomLabelPieChart } from "@/components/shared/pieChart";
-import ProcessDivComponent from "@/components/shared/Organism/processDiv";
 import AttendanceProgressComponent, { ProgressBarData } from "@/components/shared/Organism/AttendanceProgress";
-import UserCountComponent, { TableListData } from "@/components/shared/userCountComponent";
-import { getCurrentMonthInfoWithPercent } from "@/pages/api/utils";
-import { getActiveUserCount } from "@/pages/api/user";
-import { GetServerSideProps } from "next";
-import { LoadingOutlined } from "@ant-design/icons";
-import { Space, Spin } from "antd";
+import { LineChartComponent } from "@/components/shared/chart";
+import { CustomLabelPieChart } from "@/components/shared/pieChart";
+import UserCountComponent from "@/components/shared/userCountComponent";
 import {
   getDistinctFounderCountByPeriod,
   getDistinctUserForPeriodByMonth,
+  getLongTermInactiveUsers,
   getMeetingCountByDateRange,
   getParticipateUserCountByDateRange,
   getParticipationRationByLocation,
   getParticipationTrendData,
 } from "@/pages/api/meeting";
+import { getActiveUserCount, getUserCountByAge } from "@/pages/api/user";
+import { getCurrentMonthInfoWithPercent } from "@/pages/api/utils";
+import { GetServerSideProps } from "next";
+import CountUp from "react-countup";
 
 interface ChartComponentProps {
   data: Array<{ name: string; dataCount: number }>;
+}
+
+interface UserCountByuAgeProps {
+  data: Array<{ name: string; value: number }>;
 }
 
 const ChartData = [
@@ -61,13 +62,13 @@ const renderChangeRate = (value: number) => {
   }
 };
 
-const colData: TableListData[] = [
-  { no: 1, name: "김건우 (99)", count: 90 },
-  { no: 2, name: "송영규 (99)", count: 80 },
-  { no: 3, name: "김선관 (81)", count: 70 },
-  { no: 4, name: "서우혁 (82)", count: 50 },
-  { no: 5, name: "전현진 (00)", count: 30 },
-];
+// const colData: TableListData[] = [
+//   { no: 1, name: "김건우 (99)", count: 90 },
+//   { no: 2, name: "송영규 (99)", count: 80 },
+//   { no: 3, name: "김선관 (81)", count: 70 },
+//   { no: 4, name: "서우혁 (82)", count: 50 },
+//   { no: 5, name: "전현진 (00)", count: 30 },
+// ];
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const activeUserCount = await getActiveUserCount();
@@ -90,6 +91,16 @@ const AttendanceData: ProgressBarData[] = [
 
 interface participationRationByLocationProps {
   data: Array<{ label: string; percent: number }>;
+}
+
+interface TableListData {
+  no: number;
+  name: string;
+  lastmeeting: string;
+}
+
+interface TableList {
+  data: TableListData[];
 }
 
 const StatisticSample = ({ data }: IStatisticSampleProps) => {
@@ -120,11 +131,15 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
 
   //참여자수 추이(주마다의 참여자수)의 추이
   const [participationTrendData, setParticipationTrendData] = useState<ChartComponentProps["data"] | null>(null);
+  const [userCountByAge, setUserCountByAge] = useState<UserCountByuAgeProps["data"] | null>(null);
 
   //장소별 참여율
   const [participationRationByLocation, setParticipationRationByLocation] = useState<
     participationRationByLocationProps["data"] | null
   >(null);
+
+  //장소별 참여율
+  const [longTermInactiveUsers, setLongTermInactiveUsers] = useState<TableListData[] | null>(null);
 
   useEffect(() => {
     //총 크루원수
@@ -165,7 +180,6 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
     //참여자수 추이(주마다의 참여자수)의 추이
     const fetchParticipationTrendData = async () => {
       const count = await getParticipationTrendData("2024", "6", "2024", "7");
-      console.log("count: ", count);
       if (count) setParticipationTrendData(count);
     };
 
@@ -175,8 +189,21 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
       if (result) setParticipationRationByLocation(result);
     };
 
+    //유저 나이대별 인원
+    const fetchUserCountByAge = async () => {
+      const result = await getUserCountByAge();
+      if (result) setUserCountByAge(result);
+    };
+
+    const fetchLongTermInactiveUsers = async () => {
+      const result = await getLongTermInactiveUsers();
+      if (result) setLongTermInactiveUsers(result);
+    };
+
     // const [participationRationByLocation, setParticipationRationByLocation] = useState<
 
+    fetchLongTermInactiveUsers();
+    fetchUserCountByAge();
     fetchParticipationRationByLocation();
     fetchParticipationTrendData();
     fetchDistinctFounderCountByPeriod();
@@ -275,16 +302,8 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
             </div>
             <div className="h-full space-x-4 flex-2">
               <div className="h-full p-5 border rounded-lg ">
-                <div>연령대별 출석률(5살 단위,20,25,30,35,40,45)</div>
-                {/* <div className="mt-3">
-                  <div className="text-2xl font-semibold grow">
-                    <CountUp end={data.visitor.value} separator="," />명
-                  </div>출석 랭킹
-                  <div>{renderChangeRate(data.visitor.rate)}</div>
-                </div> */}
-                {/* { BasicBarChart, MultiBarChart, StackedBarChart } */}
-                {/* {(BasicPieChart, DonutPieChart, CustomLabelPieChart)} */}
-                <CustomLabelPieChart />
+                <div>연령대별 인원</div>
+                {userCountByAge ? <CustomLabelPieChart data={userCountByAge} /> : <div>Loading...</div>}
               </div>
             </div>
             <div className="h-full space-x-4 flex-2">
@@ -303,12 +322,20 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
           <div className="flex flex-col flex-1 space-y-4">
             <div className="flex-1 h-full space-x-4">
               <div className="h-full p-5 border rounded-lg">
-                <UserCountComponent title="출석 랭킹" data={colData} />
+                {longTermInactiveUsers ? (
+                  <UserCountComponent title="미참여 인원" data={longTermInactiveUsers} />
+                ) : (
+                  <div>Loading...</div>
+                )}
               </div>
             </div>
             <div className="flex-1 h-full space-x-4">
               <div className="h-full p-5 border rounded-lg ">
-                <UserCountComponent title="개설 랭킹" data={colData} />
+                {longTermInactiveUsers ? (
+                  <UserCountComponent title="장기 미 출석자" data={longTermInactiveUsers} />
+                ) : (
+                  <div>Loading...</div>
+                )}
               </div>
             </div>
           </div>
