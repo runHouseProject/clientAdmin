@@ -40,7 +40,6 @@ const CustomLegend = () => {
 };
 
 const LineChartComponent: React.FC<ChartComponentProps> = ({ data }) => {
-  console.log("data3333333: ", data);
   return (
     <ResponsiveContainer width="100%" height={150}>
       <LineChart

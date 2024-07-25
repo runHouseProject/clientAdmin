@@ -77,7 +77,7 @@ const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ meeting }) => {
   ];
 
   const handleFormFinish = async (values: any) => {
-    console.log("Form values:3333333", values);
+    //console.log("Form values:3333333", values);
     // API 호출 예시
     try {
       await updateMeeting(values);
@@ -89,7 +89,7 @@ const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ meeting }) => {
   };
 
   const handleDelete = async (id: string) => {
-    console.log("Delete meeting with id:3333333", id);
+    //console.log("Delete meeting with id:3333333", id);
     // API 호출 예시
     try {
       await deleteMeetingDataById(id);

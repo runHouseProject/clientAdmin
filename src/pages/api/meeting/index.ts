@@ -53,8 +53,6 @@ export async function getMeetingDataAll(): Promise<MeetingData[]> {
     .order("meeting_date", { ascending: false })
     .order("founder", { ascending: false });
 
-  console.log("data:33333 ", data);
-
   if (error) {
     console.error("Error fetching data:", error);
     return [];
@@ -291,8 +289,8 @@ export async function deleteMeetingDataById(id: string): Promise<{ data: any; er
   let updates: any = { updated_at: new Date().toISOString() };
   if (id) updates.delete = true;
   const { data, error } = await supabase.from("meeting").update(updates).eq("_id", id).select();
-  console.log("data333: ", data);
-  console.log("error333: ", error);
+  //console.log("data333: ", data);
+  //console.log("error333: ", error);
 
   if (error) {
     throw new Error("Failed to fetch meeting data");
@@ -329,12 +327,12 @@ export async function getMeetingDate(meetingDate: string): Promise<MeetingMember
     `
     )
     .eq("meeting_date", meetingDate);
-  //console.log("meetingDate: ", meetingDate);
+  ////console.log("meetingDate: ", meetingDate);
 
   // data
-  //console.log("data: ", data);
+  ////console.log("data: ", data);
   // error
-  //console.log("error: ", error);
+  ////console.log("error: ", error);
   if (error) {
     console.error("Error fetching data:", error);
     return [];
@@ -365,7 +363,7 @@ export async function getMeetingCountByDateRange(
   p_end_year: string,
   p_end_month: string
 ) {
-  // console.log("getUserInfoById userId: ", accountId);
+  // //console.log("getUserInfoById userId: ", accountId);
 
   const { data, error } = await supabase.rpc("get_meeting_count_by_date_range", {
     p_start_year: parseInt(p_start_year),
@@ -373,8 +371,6 @@ export async function getMeetingCountByDateRange(
     p_end_year: parseInt(p_end_year),
     p_end_month: parseInt(p_end_month),
   });
-
-  console.log("data get_meeting_count_by_date_range: ", data);
 
   function getThisMonthFounderCount(data: DataItem[]) {
     if (!data || data.length === 0) {
@@ -439,9 +435,6 @@ export async function getParticipateUserCountByDateRange(
     end_year: parseInt(end_year),
     end_month: parseInt(end_month),
   });
-
-  console.log("data get_meeting_count_by_date_range: ", data);
-  console.log("data get_meeting_count_by_date_range error: ", error);
 
   function getThisMonthCount(data: ParticipateUserCountDataItem[]) {
     if (!data || data.length === 0) {
@@ -509,8 +502,8 @@ export async function getDistinctUserForPeriodByMonth(
     end_month: parseInt(end_month),
   });
 
-  console.log("data get_meeting_count_by_date_range: ", data);
-  console.log("data get_meeting_count_by_date_range error: ", error);
+  //console.log("data get_meeting_count_by_date_range: ", data);
+  //console.log("data get_meeting_count_by_date_range error: ", error);
 
   function getThisMonthCount(data: ParticipateDistinctUserCountDataItem[]) {
     if (!data || data.length === 0) {
@@ -578,8 +571,8 @@ export async function getDistinctFounderCountByPeriod(
     end_month: parseInt(end_month),
   });
 
-  console.log("data get_meeting_count_by_date_range: ", data);
-  console.log("data get_meeting_count_by_date_range error: ", error);
+  //console.log("data get_meeting_count_by_date_range: ", data);
+  //console.log("data get_meeting_count_by_date_range error: ", error);
 
   function getThisMonthCount(data: ParticipateDistinctFounderCountDataItem[]) {
     if (!data || data.length === 0) {
@@ -670,7 +663,7 @@ export async function getParticipationTrendData(
   };
 
   const chartData = transformData(data);
-  console.log("chartData1111: ", chartData);
+  //console.log("chartData1111: ", chartData);
 
   return chartData;
 }
@@ -727,7 +720,15 @@ interface ChartComponentPropstt {
 
 //============================================================================
 
-export async function getLongTermInactiveUsers() {
+export async function getLongTermInactiveUsers(
+  start_year: string,
+  start_month: string,
+  end_year: string,
+  end_month: string
+) {
+  const startDate = `${start_year}-${start_month}-01`;
+  const endDate = `${end_year}-${end_month}-01`;
+
   let { data: user } = await supabase
     .from("user")
     .select(
@@ -741,54 +742,97 @@ export async function getLongTermInactiveUsers() {
 `
     )
     .eq("activation", true)
-    .gte("meeting.meeting_date", "2024-04-01")
-    .lte("meeting.meeting_date", "2024-08-01");
+    .gte("meeting.meeting_date", startDate)
+    .lte("meeting.meeting_date", endDate);
 
-  console.log("user: ", user);
-  // console.log("error22: ", error22);
+  let result = null;
 
-  const { data, error } = await supabase.rpc("get_inactive_users");
-  console.log("error: ", error);
-  console.log("data555555: ", data);
-
-  if (error) {
-    console.error("Error fetching data: ", error.message);
-    throw new Error(error.message);
+  if (user) {
+    result = processUserData(user, false);
   }
 
-  interface User {
-    name: string;
-    birthyear: string;
-    lastmeeting: string;
+  //console.log("twqetrqwerqwer: ", result);
+  return result;
+}
+
+//============================================================================
+
+export async function getNotParticiPateUsers(
+  start_year: string,
+  start_month: string,
+  end_year: string,
+  end_month: string
+) {
+  const startDate = `${start_year}-${start_month}-01`;
+  const endDate = `${end_year}-${end_month}-01`;
+
+  let { data: user } = await supabase
+    .from("user")
+    .select(
+      `
+  name,
+  activation,
+  meeting (
+    accountId,
+    meeting_date
+  )
+`
+    )
+    .eq("activation", true)
+    .gte("meeting.meeting_date", startDate)
+    .lte("meeting.meeting_date", endDate);
+
+  let result = null;
+
+  if (user) {
+    result = processUserData(user, true);
   }
 
-  interface TableListData {
-    no: number;
-    name: string;
-    lastmeeting: string;
-  }
+  return result;
+}
 
-  function getOldestMeetingUsers(data: User[], topN: number): TableListData[] {
-    // "미참여"를 제외한 데이터만 사용
-    const filteredData = data.filter((user) => user.lastmeeting !== "미참여");
+type Meeting22 = {
+  accountId: string;
+  meeting_date: string;
+};
 
-    // 날짜를 기준으로 정렬
-    const sortedData = filteredData.sort((a, b) => {
-      return new Date(a.lastmeeting).getTime() - new Date(b.lastmeeting).getTime();
-    });
+type User = {
+  name: string;
+  activation: boolean;
+  meeting: Meeting22[];
+};
 
-    // 상위 topN명만 선택
-    const topUsers = sortedData.slice(0, topN);
+type ProcessedUser = {
+  no: number;
+  name: string;
+  lastmeeting: string;
+};
 
-    // 결과 생성
-    const result = topUsers.map((user, index) => ({
+function processUserData(data: User[], includeNonParticipants: boolean): ProcessedUser[] {
+  const processedUsers = data.map((user, index) => {
+    const lastMeetingDate =
+      user.meeting.length > 0
+        ? user.meeting.reduce((latest, current) =>
+            new Date(latest.meeting_date) > new Date(current.meeting_date) ? latest : current
+          ).meeting_date
+        : "미참여";
+
+    return {
       no: index + 1,
-      name: `${user.name} (${user.birthyear})`,
-      lastmeeting: user.lastmeeting,
-    }));
+      name: user.name,
+      lastmeeting: lastMeetingDate,
+    };
+  });
 
-    return result;
-  }
+  let filteredUsers = includeNonParticipants
+    ? processedUsers.filter((user) => user.lastmeeting === "미참여")
+    : processedUsers.filter((user) => user.lastmeeting !== "미참여");
 
-  return getOldestMeetingUsers(data, 5);
+  filteredUsers = filteredUsers.sort((a, b) => {
+    if (a.lastmeeting === "미참여") return 1;
+    if (b.lastmeeting === "미참여") return -1;
+    return new Date(a.lastmeeting).getTime() - new Date(b.lastmeeting).getTime();
+  });
+
+  return filteredUsers;
 }

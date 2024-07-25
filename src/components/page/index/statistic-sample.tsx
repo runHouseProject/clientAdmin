@@ -11,6 +11,7 @@ import {
   getDistinctUserForPeriodByMonth,
   getLongTermInactiveUsers,
   getMeetingCountByDateRange,
+  getNotParticiPateUsers,
   getParticipateUserCountByDateRange,
   getParticipationRationByLocation,
   getParticipationTrendData,
@@ -72,7 +73,6 @@ const renderChangeRate = (value: number) => {
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const activeUserCount = await getActiveUserCount();
-  console.log("activeUserCount:11 ", activeUserCount);
 
   return {
     props: {
@@ -104,9 +104,9 @@ interface TableList {
 }
 
 const StatisticSample = ({ data }: IStatisticSampleProps) => {
-  console.log("data: ", data);
+
   const result = getCurrentMonthInfoWithPercent();
-  console.log("result3333: ", result);
+
   const monthProcessPercent: ProgressBarData[] = [result];
 
   //총 크루원수
@@ -140,6 +140,7 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
 
   //장소별 참여율
   const [longTermInactiveUsers, setLongTermInactiveUsers] = useState<TableListData[] | null>(null);
+  const [notParticiPateUsers, setNotParticiPateUsers] = useState<TableListData[] | null>(null);
 
   useEffect(() => {
     //총 크루원수
@@ -196,12 +197,17 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
     };
 
     const fetchLongTermInactiveUsers = async () => {
-      const result = await getLongTermInactiveUsers();
-      if (result) setLongTermInactiveUsers(result);
+      const result = await getLongTermInactiveUsers("2024", "4", "2024", "7");
+      if (result) setLongTermInactiveUsers(result.slice(0, 5));
     };
 
-    // const [participationRationByLocation, setParticipationRationByLocation] = useState<
+    const fetchNotParticiPateUsers = async () => {
+      const result = await getNotParticiPateUsers("2024", "4", "2024", "7");
+      if (result) setNotParticiPateUsers(result.slice(0, 5));
+    };
 
+    fetchNotParticiPateUsers();
+    fetchLongTermInactiveUsers();
     fetchLongTermInactiveUsers();
     fetchUserCountByAge();
     fetchParticipationRationByLocation();
@@ -323,7 +329,7 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
             <div className="flex-1 h-full space-x-4">
               <div className="h-full p-5 border rounded-lg">
                 {longTermInactiveUsers ? (
-                  <UserCountComponent title="미참여 인원" data={longTermInactiveUsers} />
+                  <UserCountComponent title="장기 미참여" data={longTermInactiveUsers} />
                 ) : (
                   <div>Loading...</div>
                 )}
@@ -331,8 +337,8 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
             </div>
             <div className="flex-1 h-full space-x-4">
               <div className="h-full p-5 border rounded-lg ">
-                {longTermInactiveUsers ? (
-                  <UserCountComponent title="장기 미 출석자" data={longTermInactiveUsers} />
+                {notParticiPateUsers ? (
+                  <UserCountComponent title="미참여 인원" data={notParticiPateUsers} />
                 ) : (
                   <div>Loading...</div>
                 )}

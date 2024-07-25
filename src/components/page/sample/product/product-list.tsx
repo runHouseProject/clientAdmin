@@ -35,7 +35,7 @@ const ProductList = () => {
     () => [
       {
         key: "statusUpdate",
-        label: <a onClick={() => console.log(selectedRowKeys)}>상태수정</a>,
+        label: <a onClick={() => //console.log(selectedRowKeys)}>상태수정</a>,
       },
     ],
     [selectedRowKeys]

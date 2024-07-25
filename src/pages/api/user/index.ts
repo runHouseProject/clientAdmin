@@ -17,7 +17,7 @@ export async function getUserAttendance(): Promise<getUserAttendanceList[]> {
   };
 
   // data;
-  // console.log("data: ", data);
+  // //console.log("data: ", data);
 
   if (error) {
     console.error("Error fetching data:", error);
@@ -36,10 +36,10 @@ export async function getUserAttendance(): Promise<getUserAttendanceList[]> {
 
 //유저 삭제 (활동여부 false 처리)
 export async function deleteUser(userId: string) {
-  console.log("deleteUser userId: ", userId);
+  //console.log("deleteUser userId: ", userId);
 
   const { data, error } = await supabase.from("user").update({ activation: false }).eq("id", userId).select();
-  console.log("deleteUser data: ", data);
+  //console.log("deleteUser data: ", data);
 
   if (error) {
     console.error("Error fetching data:", error);
@@ -48,11 +48,11 @@ export async function deleteUser(userId: string) {
 
 //한명의 유저 정보상세
 export async function getUserInfoById(accountId: string) {
-  console.log("getUserInfoById userId: ", accountId);
+  //console.log("getUserInfoById userId: ", accountId);
 
   const { data, error } = await supabase.rpc("get_user_details_and_meeting_counts", { account_id: accountId });
 
-  console.log("data: ", data);
+  //console.log("data: ", data);
 
   if (error) {
     console.error("Error executing query:", error);
@@ -78,8 +78,8 @@ export async function getUserInfoById(accountId: string) {
 
 export async function getActiveUserCount() {
   // const { data, error, count } = await supabase.from("user").select("*", { count: "exact" }).eq("activation", true);
-  // console.log("count4444:33 ", count);
-  // console.log("data111111: ", data);
+  // //console.log("count4444:33 ", count);
+  // //console.log("data111111: ", data);
   const { data, error } = await supabase.rpc("get_monthly_user_count_by_month", {
     start_year: 2024,
     start_month: 6,
@@ -87,20 +87,20 @@ export async function getActiveUserCount() {
     end_month: 8,
   });
   // data;
-  console.log("error: ", error);
-  console.log("data: ", data);
+  //console.log("error: ", error);
+  //console.log("data: ", data);
 
   // start_year INT, start_month INT, end_year INT, end_year INT
   if (error) {
     console.error("Error fetching count:", error);
     return null;
   } else {
-    // console.log("Count of rows where activation is true:", count);
+    // //console.log("Count of rows where activation is true:", count);
   }
 
   if (data.length !== 0) {
     const result = calculateUserAccCount(data);
-    console.log("result: ", result);
+    //console.log("result: ", result);
     return result;
   }
 
@@ -165,6 +165,6 @@ export async function getUserCountByAge(): Promise<GroupedData[]> {
   const groupedData = groupByBirthYearRange(data || []);
   const result: GroupedData[] = Object.entries(groupedData).map(([name, value]) => ({ name, value }));
 
-  console.log(result);
+  //console.log(result);
   return result;
 }

@@ -1,16 +1,13 @@
 import AttendanceProgressComponent, { ProgressBarData } from "@/components/shared/Organism/AttendanceProgress";
 import ProcessDivComponent from "@/components/shared/Organism/processDiv";
 import UserCountComponent, { TableListData } from "@/components/shared/userCountComponent";
-import CountUp from "react-countup";
 import type { DatePickerProps } from "antd";
 
-import React, { useState } from "react";
 import type { ConfigProviderProps, RadioChangeEvent } from "antd";
-import { DatePicker, Radio, Space } from "antd";
-import { ConfigProvider } from "antd";
-import "dayjs/locale/ko";
-import dayjs from "dayjs";
+import { ConfigProvider, DatePicker } from "antd";
 import locale from "antd/locale/ko_KR";
+import "dayjs/locale/ko";
+import { useState } from "react";
 
 interface IStatisticSampleProps {
   data: {
@@ -101,7 +98,7 @@ const colData: TableListData[] = [
 type SizeType = ConfigProviderProps["componentSize"];
 
 const onChange: DatePickerProps["onChange"] = (date, dateString) => {
-  // console.log(date, dateString);
+  // //console.log(date, dateString);
 };
 
 const StatisticMonth = ({ data }: IStatisticSampleProps) => {

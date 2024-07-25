@@ -2,7 +2,6 @@
 import { getDefaultLayout, IDefaultLayoutPage, IPageHeader } from "@/components/layout/default-layout";
 import MeetingForm from "@/components/shared/molecules/MeetingForm";
 import { useAuth } from "@/lib/auth/auth-provider";
-import { deleteMeetingDataById, getMeetingDateById, updateMeeting } from "@/pages/api/meeting";
 import { getUserInfoById } from "@/pages/api/user";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
@@ -26,11 +25,11 @@ interface FormField {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
-  console.log("id: ", id);
+  //console.log("id: ", id);
 
   try {
     const userData = await getUserInfoById(id);
-    console.log("meeting: 1111111111111111", userData);
+    //console.log("meeting: 1111111111111111", userData);
     return {
       props: {
         userData,
@@ -61,7 +60,7 @@ const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ userData }) => {
   ];
 
   const handleFormFinish = async (values: any) => {
-    console.log("Form values:3333333", values);
+    //console.log("Form values:3333333", values);
     // API 호출 예시
     try {
       // await updateMeeting(values);
@@ -72,7 +71,7 @@ const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ userData }) => {
   };
 
   const handleDelete = async (id: string) => {
-    console.log("Delete meeting with id:3333333", id);
+    //console.log("Delete meeting with id:3333333", id);
     // API 호출 예시
     try {
       // await deleteMeetingDataById(id);
