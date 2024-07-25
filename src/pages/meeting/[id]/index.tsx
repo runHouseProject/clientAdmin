@@ -7,7 +7,7 @@ import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 
 const pageHeader: IPageHeader = {
-  title: "Welcome",
+  title: "",
 };
 
 interface Option {
@@ -105,7 +105,7 @@ const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ meeting }) => {
 
   return (
     <>
-      <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2>
+      {/* <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2> */}
       <MeetingForm
         meeting={meeting}
         fields={fields}

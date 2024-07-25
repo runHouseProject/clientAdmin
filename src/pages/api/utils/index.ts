@@ -12,7 +12,7 @@ export function getCurrentMonthInfoWithPercent() {
   const now = dayjs();
 
   // Get the current month label in Korean
-  const monthLabel = now.format("MMMM"); // e.g., "7월"
+  const monthLabel = now.format("MMMM DD일"); // "7월 25일"
 
   // Get the current day of the month
   const currentDay = now.date();

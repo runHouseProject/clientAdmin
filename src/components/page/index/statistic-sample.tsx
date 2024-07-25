@@ -104,7 +104,6 @@ interface TableList {
 }
 
 const StatisticSample = ({ data }: IStatisticSampleProps) => {
-
   const result = getCurrentMonthInfoWithPercent();
 
   const monthProcessPercent: ProgressBarData[] = [result];
@@ -198,12 +197,12 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
 
     const fetchLongTermInactiveUsers = async () => {
       const result = await getLongTermInactiveUsers("2024", "4", "2024", "7");
-      if (result) setLongTermInactiveUsers(result.slice(0, 5));
+      if (result) setLongTermInactiveUsers(result.slice(0, 6));
     };
 
     const fetchNotParticiPateUsers = async () => {
       const result = await getNotParticiPateUsers("2024", "4", "2024", "7");
-      if (result) setNotParticiPateUsers(result.slice(0, 5));
+      if (result) setNotParticiPateUsers(result.slice(0, 6));
     };
 
     fetchNotParticiPateUsers();
@@ -292,29 +291,23 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
           <div className="flex flex-col flex-1 space-y-4">
             <div className="h-full space-x-4 flex-2">
               <div className="h-full p-5 border rounded-lg">
-                <div>장소별 참여율(정기런 포함)</div>
-                <div className="mt-3">
-                  <div className="flex items-center mt-3">
-                    {/* <div className="text-2xl font-semibold grow">
-                      <CountUp end={data.visitor.value} separator="," />명
-                    </div>
-                    <div>{renderChangeRate(data.visitor.rate)}</div> */}
-                    <AttendanceProgressComponent
-                      data={participationRationByLocation !== null ? participationRationByLocation : null}
-                    />
-                  </div>
+                <div className="pb-5 text-lg font-semibold">장소별 참여율(정기런 포함)</div>
+                <div className="flex items-center ">
+                  <AttendanceProgressComponent
+                    data={participationRationByLocation !== null ? participationRationByLocation : null}
+                  />
                 </div>
               </div>
             </div>
             <div className="h-full space-x-4 flex-2">
-              <div className="h-full p-5 border rounded-lg ">
-                <div>연령대별 인원</div>
+              <div className="h-full px-5 pt-5 border rounded-lg ">
+                <div className="pb-4 text-lg font-semibold">연령대별 인원</div>
                 {userCountByAge ? <CustomLabelPieChart data={userCountByAge} /> : <div>Loading...</div>}
               </div>
             </div>
             <div className="h-full space-x-4 flex-2">
               <div className="h-full p-5 border rounded-lg ">
-                <div>참여 크루원 수</div>
+                <div className="text-lg font-semibold">참여 크루원 수</div>
                 <div>
                   {participationTrendData ? (
                     <LineChartComponent data={participationTrendData} />
@@ -327,7 +320,7 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
           </div>
           <div className="flex flex-col flex-1 space-y-4">
             <div className="flex-1 h-full space-x-4">
-              <div className="h-full p-5 border rounded-lg">
+              <div className="p-5 border rounded-lg">
                 {longTermInactiveUsers ? (
                   <UserCountComponent title="장기 미참여" data={longTermInactiveUsers} />
                 ) : (

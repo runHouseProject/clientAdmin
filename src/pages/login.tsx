@@ -39,8 +39,10 @@ const LoginPage = () => {
               />
             ) : null}
             <div className="flex flex-col items-center justify-center px-2 mt-8 sm:mt-0">
-              <h2 className="mt-2 text-5xl font-bold leading-tight inter">AWESOME</h2>
-              <div className="mt-1 text-lg text-gray-400">Admin System</div>
+              <h2 className="mt-2 text-4xl font-bold leading-tight inter">TCRC</h2>
+              <h2 className="mt-2 font-bold leading-tight text-1xl inter">x</h2>
+              <h2 className="mt-2 text-4xl font-bold leading-tight inter">RUNHOUSE</h2>
+              {/* <div className="mt-1 text-lg text-gray-400">Admin System</div> */}
             </div>
 
             <div className="w-full px-2 mt-12 sm:px-6">

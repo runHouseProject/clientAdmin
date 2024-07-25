@@ -18,7 +18,7 @@ const IndexPage: IDefaultLayoutPage = () => {
 
   return (
     <>
-      <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2>
+      {/* <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2> */}
       {/* <div>
         {data ? (
           <StatisticSample data={data} />
@@ -32,7 +32,7 @@ const IndexPage: IDefaultLayoutPage = () => {
       {/* <ProductListPage /> */}
       <h3 className="title">달력</h3>
       <CalendarSample />
-      <Divider />v
+      {/* <Divider />v */}
     </>
   );
 };

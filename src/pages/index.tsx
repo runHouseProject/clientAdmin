@@ -5,9 +5,9 @@ import StatisticSample from "@/components/page/index/statistic-sample";
 import { useAuth } from "@/lib/auth/auth-provider";
 import { Alert, Divider, Skeleton } from "antd";
 
-const pageHeader: IPageHeader = {
-  title: "Welcome",
-};
+// const pageHeader: IPageHeader = {
+//   title: "Welcome",
+// };
 
 // 메인 페이지
 
@@ -17,9 +17,9 @@ const IndexPage: IDefaultLayoutPage = () => {
 
   return (
     <>
-      <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2>
-
-      <div>
+      {/* <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2> */}
+      <div></div>
+      <div className="pt-5">
         {data ? (
           <StatisticSample data={data} />
         ) : error ? (

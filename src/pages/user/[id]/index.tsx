@@ -87,7 +87,7 @@ const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ userData }) => {
 
   return (
     <>
-      <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2>
+      {/* <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2> */}
       <MeetingForm
         meeting={userData}
         fields={fields}

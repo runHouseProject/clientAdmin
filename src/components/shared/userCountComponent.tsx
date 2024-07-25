@@ -16,17 +16,16 @@ interface TableListComponentProps {
 const UserCountComponent: React.FC<TableListComponentProps> = ({ title = "출석 랭킹", data }) => {
   return (
     <>
-      <div className="mb-2 text-2xl font-semibold">
+      <div className="mb-1 font-semibold text-1xl">
         <h1>{title}</h1>
       </div>
-      <div className="table w-full font-semibold text-1xl grow">
+      <div className="table w-full text-lg font-semibold grow">
         <div>
           {data.map((item, index) => (
-            <div key={item.no} className="grid grid-cols-12 gap-2 py-2 text-left row">
-              <div className="col-span-2 pl-3">{index + 1}</div>
-              <div className="col-span-7 pl-3">{item.name}</div>
-              <div className="col-span-3 pl-3">{item.lastmeeting}</div>
-
+            <div key={item.no} className="grid grid-cols-12 gap-1 py-1 text-left row">
+              <div className="col-span-2 pl-3 text-center">{index + 1}</div>
+              <div className="col-span-6 pl-3 text-center">{item.name}</div>
+              <div className="col-span-4 pl-3">{item.lastmeeting}</div>
               {index < data.length - 1 && <Divider className="col-span-12 my-1" />}
             </div>
           ))}

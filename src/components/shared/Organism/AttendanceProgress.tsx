@@ -15,15 +15,15 @@ const AttendanceProgressComponent: React.FC<AttendanceProgressProps> = ({ title,
   return (
     <>
       {title && (
-        <div className="mb-4 text-2xl font-semibold grow">
+        <div className="mb-4 font-semibold text-1xl grow">
           <h1>{title}</h1>
         </div>
       )}
-      <div className="flex-col font-semibold text-1xl grow">
+      <div className="flex-col text-sm font-semibold grow">
         {data ? (
           data.map((item) => (
             <div key={item.label} className="progress-bar-container">
-              <ProgressBar label={item.label} percent={item.percent} status="active" strokeWidth={12} />
+              <ProgressBar label={item.label} percent={item.percent} status="active" strokeWidth={9} />
             </div>
           ))
         ) : (

@@ -48,7 +48,7 @@ interface UserCountByuAgeProps {
 }
 
 const CustomLabelPieChart: React.FC<UserCountByuAgeProps> = ({ data }) => (
-  <ResponsiveContainer width="100%" height={150}>
+  <ResponsiveContainer width="100%" height={130}>
     <PieChart>
       <Pie
         data={data}
@@ -58,7 +58,7 @@ const CustomLabelPieChart: React.FC<UserCountByuAgeProps> = ({ data }) => (
         nameKey="name"
         cx="50%"
         cy="50%"
-        outerRadius={60}
+        outerRadius={50}
         fill="#8884d8"
       >
         {data.map((entry, index) => (

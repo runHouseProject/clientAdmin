@@ -9,7 +9,7 @@ import { CheckCircleTwoTone, CloseCircleTwoTone, EditTwoTone } from "@ant-design
 import { Space } from "antd";
 
 const pageHeader: IPageHeader = {
-  title: "Welcome",
+  title: "모임 리스트",
 };
 
 interface DataType {
@@ -98,7 +98,7 @@ const IndexPage: IDefaultLayoutPage<IndexPageProps> = ({ data }) => {
   const { session } = useAuth();
   return (
     <>
-      <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2>
+      {/* <h2 className="title">👋 {session.user.name || "관리자"}님 안녕하세요!</h2> */}
       <SortTable
         data={data}
         columnsConfig={columnsConfig}
