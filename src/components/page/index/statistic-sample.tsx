@@ -1,5 +1,5 @@
 import { IDashboardResponse } from "@/client/sample/dashboard";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Equal } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 import AttendanceProgressComponent, { ProgressBarData } from "@/components/shared/Organism/AttendanceProgress";
@@ -58,8 +58,13 @@ const renderChangeRate = (value: number) => {
         {value}%
       </span>
     );
-  } else {
-    <span className="flex items-center px-2 py-1 text-sm text-white rounded-full bg-alizarin">{}</span>;
+  } else if (value == 0) {
+    return (
+      <span className="flex items-center px-2 py-1 text-sm text-white bg-blue-500 rounded-full">
+        <Equal className="w-5 h-4" />
+        {"전달동일"}
+      </span>
+    );
   }
 };
 
@@ -167,6 +172,7 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
     const fetchParticipateDistinctUserCountByDateRange = async () => {
       const count = await getDistinctUserForPeriodByMonth("2024", "6", "2024", "7");
       if (count) setDistinctParticipateUserCount(count?.thisMonthParticipateDistinctUserCount);
+      console.log(count?.diffLastMonthRate);
       if (count) setDiffLastDistinctParticipateUserCount(count?.diffLastMonthRate);
     };
 
@@ -273,7 +279,7 @@ const StatisticSample = ({ data }: IStatisticSampleProps) => {
                 </div>
                 <div>
                   {renderChangeRate(
-                    diffLastDistinctParticipateUserCount !== null ? diffLastDistinctParticipateUserCount : 0
+                    diffLastDistinctParticipateUserCount !== null ? diffLastDistinctParticipateUserCount : 100
                   )}
                 </div>
               </div>
