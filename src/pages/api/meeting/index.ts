@@ -502,7 +502,7 @@ export async function getDistinctUserForPeriodByMonth(
     end_month: parseInt(end_month),
   });
 
-  //console.log("data get_meeting_count_by_date_range: ", data);
+  console.log("data get_meeting_count_by_date_range: ", data);
   //console.log("data get_meeting_count_by_date_range error: ", error);
 
   function getThisMonthCount(data: ParticipateDistinctUserCountDataItem[]) {
@@ -544,6 +544,7 @@ export async function getDistinctUserForPeriodByMonth(
 
   const thisMonthParticipateDistinctUserCount = getThisMonthCount(data);
   const diffLastMonthRate = getDiffLastMonth(data);
+  console.log("diffLastMonthRate: ", diffLastMonthRate);
 
   return {
     thisMonthParticipateDistinctUserCount,
